@@ -1,83 +1,20 @@
+/* eslint-disable no-console */
 /* eslint-disable no-alert */
 /* eslint-disable react/button-has-type */
 import React, { useState } from 'react';
 import { Button, ListGroup, OverlayTrigger, Popover } from 'react-bootstrap';
 import AddProfile from './AddProfile';
-
-const tableHead = [
-  {
-    id: 1,
-    title: 'Browser Profile Name',
-  },
-  {
-    id: 2,
-    title: 'Serial No',
-  },
-  {
-    id: 3,
-    title: 'Proxy ID',
-  },
-  {
-    id: 4,
-    title: 'List Assigned',
-  },
-  {
-    id: 5,
-    title: 'Status',
-  },
-  {
-    id: 6,
-    title: 'Daily Progress',
-  },
-  {
-    id: 7,
-    title: 'Total Progres',
-  },
-  {
-    id: 8,
-    title: ' ',
-  },
-  {
-    id: 9,
-    title: ' ',
-  },
-];
-const data = [
-  {
-    id: 1,
-    name: 'Jacob Alex',
-    serial_no: 'j9xsdr4',
-    proxy_id: 3,
-    list_assigned: 'messi followers',
-    status: 'running',
-    daily_progress: 'sent 4 out of 40',
-    total_progress: 'sent 357 out of 4000',
-  },
-  {
-    id: 2,
-    name: 'Jacob Alex',
-    serial_no: 'j9xsdr4',
-    proxy_id: 3,
-    list_assigned: 'messi followers',
-    status: 'running',
-    daily_progress: 'sent 4 out of 40',
-    total_progress: 'sent 357 out of 4000',
-  },
-  {
-    id: 3,
-    name: 'Jacob Alex',
-    serial_no: 'j9xsdr4',
-    proxy_id: 3,
-    list_assigned: 'messi followers',
-    status: 'running',
-    daily_progress: 'sent 4 out of 40',
-    total_progress: 'sent 357 out of 4000',
-  },
-];
+import { data, tableHead } from '../../constant';
 
 function Dm() {
   const [modalShow, setModalShow] = useState(false);
-  const handleDelete = () => {};
+  const [dmData, setData] = useState(data);
+  console.log(dmData);
+  const [id, setId] = useState(null);
+  const handleDelete = (itemId) => {
+    const newData = data.filter((item) => item.id !== itemId);
+    setData(newData);
+  };
   const handleEdit = () => {};
   const popover = (
     <Popover id="popover-basic">
@@ -87,7 +24,7 @@ function Dm() {
           <ListGroup.Item action onClick={handleEdit}>
             Edit
           </ListGroup.Item>
-          <ListGroup.Item action onClick={handleDelete}>
+          <ListGroup.Item action onClick={() => handleDelete(id)}>
             Delete
           </ListGroup.Item>
         </ListGroup>
@@ -117,8 +54,8 @@ function Dm() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map((item) => (
-                    <tr>
+                  {dmData?.map((item) => (
+                    <tr key={item?.id}>
                       <td>{item?.name}</td>
                       <td>{item?.serial_no}</td>
                       <td>{item?.proxy_id}</td>
@@ -145,8 +82,12 @@ function Dm() {
                           trigger="click"
                           placement="bottom"
                           overlay={popover}
+                          rootClose
                         >
-                          <Button variant="success">
+                          <Button
+                            variant="success"
+                            onClick={() => setId(item?.id)}
+                          >
                             {' '}
                             <i className="bi bi-three-dots-vertical" />
                           </Button>

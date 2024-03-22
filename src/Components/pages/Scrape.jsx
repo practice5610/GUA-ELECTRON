@@ -90,7 +90,10 @@ function Scrape() {
                     : 'btn_secondary'
                 }
                 key={item?.id}
-                onClick={() => handleClick(item.id)}
+                onClick={() => {
+                  handleClick(item.id);
+                  setValue(initialValues);
+                }}
               >
                 {item?.title}
               </button>

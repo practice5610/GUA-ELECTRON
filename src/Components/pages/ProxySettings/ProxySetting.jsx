@@ -6,6 +6,43 @@ import React, { useState } from 'react';
 import '../styles.css';
 import AddProxy from './AddProxy';
 
+const tableHead = [
+  {
+    id: 1,
+    title: '#',
+  },
+  {
+    id: 2,
+    title: 'Proxy Id',
+  },
+  {
+    id: 3,
+    title: 'Proxy Information',
+  },
+  {
+    id: 4,
+    title: 'Proxy Type',
+  },
+];
+
+const data = [
+  {
+    id: 1,
+    proxy_info: 'socks5://75.167.144.120:9017',
+    proxy_type: 'socks5',
+  },
+  {
+    id: 2,
+    proxy_info: 'socks5://75.167.144.120:9017',
+    proxy_type: 'socks5',
+  },
+  {
+    id: 3,
+    proxy_info: 'socks5://75.167.144.120:9017',
+    proxy_type: 'socks5',
+  },
+];
+
 function ProxySetting() {
   const [modalShow, setModalShow] = useState(false);
   return (
@@ -48,45 +85,32 @@ function ProxySetting() {
           <table className="table ">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">Proxy Id</th>
-                <th scope="col">Proxy Information</th>
-                <th scope="col">Proxy Type</th>
+                {tableHead?.map((item) => (
+                  <th key={item?.id} scope="col">
+                    {item?.title}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="flexCheckDefault"
-                  />
-                </td>
-                <td>1</td>
-                <td>
-                  socks5://75.167.144.120:9017{' '}
-                  <i className="bi bi-arrow-clockwise" />
-                </td>
-                <td>socks5</td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="flexCheckDefault"
-                  />
-                </td>
-                <td>2</td>
-                <td>
-                  socks5://75.167.144.120:9018{' '}
-                  <i className="bi bi-arrow-clockwise" />
-                </td>
-                <td>socks5</td>
-              </tr>
+              {data?.map((item) => (
+                <tr key={item?.id}>
+                  <td>
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="flexCheckDefault"
+                    />
+                  </td>
+                  <td>{item?.id}</td>
+                  <td>
+                    {item?.proxy_info}
+                    <i className="bi bi-arrow-clockwise" />
+                  </td>
+                  <td>{item?.proxy_type}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

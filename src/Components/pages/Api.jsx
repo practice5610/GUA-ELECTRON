@@ -2,10 +2,18 @@
 import React, { useState } from 'react';
 import InputField from '../shared/InputField';
 
+const initialValues = {
+  userName: '',
+  password: '',
+};
 function Api() {
-  const [value, setValue] = useState('');
+  const [values, setValue] = useState(initialValues);
   const handleOnChange = (e) => {
-    setValue(e.target.value);
+    const { name, value } = e.target;
+    setValue({
+      ...values,
+      [name]: value,
+    });
   };
   return (
     <div className="wrapper">
@@ -20,14 +28,14 @@ function Api() {
           title="Enter Username"
           name="userName"
           type="text"
-          value={value}
+          value={values?.userName}
           onChange={handleOnChange}
         />
         <InputField
           title="Enter Password"
           name="password"
           type="password"
-          value={value}
+          value={values?.password}
           onChange={handleOnChange}
         />
         <div className="w-full d-flex justify-content-center mt-4">
