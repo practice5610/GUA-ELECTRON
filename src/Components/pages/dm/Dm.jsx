@@ -85,6 +85,7 @@ function Dm() {
                           rootClose
                         >
                           <Button
+                            size="sm"
                             variant="success"
                             onClick={() => setId(item?.id)}
                           >

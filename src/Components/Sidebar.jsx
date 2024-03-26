@@ -4,35 +4,52 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 const sidebar = [
   {
     id: 1,
     title: 'Proxy Settings',
-    path: 'proxy_setting',
+    path: '/dashboard/proxy_setting',
   },
   {
     id: 2,
     title: 'Scrape',
-    path: 'scrape',
+    path: '/dashboard/scrape',
   },
   {
     id: 3,
     title: 'API',
-    path: 'api',
+    path: '/dashboard/api',
   },
   {
     id: 4,
     title: 'Prospects',
-    path: 'prospects',
+    path: '/dashboard/prospects',
   },
   {
     id: 5,
     title: 'DM',
-    path: 'dm',
+    path: '/dashboard/dm',
+  },
+  {
+    id: 6,
+    title: 'Profile',
+    path: '/dashboard/profile',
+  },
+  {
+    id: 7,
+    title: 'LogIn',
+    path: '/dashboard/login',
+  },
+  {
+    id: 8,
+    title: 'SignUp',
+    path: '/dashboard/signup',
   },
 ];
-function Sidebar({ onItemClick, selectedComponent }) {
+function Sidebar({ selectedComponent }) {
+  const navigate = useNavigate();
   return (
     <div className="sidebar">
       <div className="py-2">
@@ -42,7 +59,7 @@ function Sidebar({ onItemClick, selectedComponent }) {
       {sidebar.map((item, index) => (
         <div key={index} className="btn-container">
           <button
-            onClick={() => onItemClick(item?.path)}
+            onClick={() => navigate(item?.path)}
             className={`btn list-group-item py-2 ${
               selectedComponent === item.path ? 'active' : ''
             }`}
@@ -57,6 +74,6 @@ function Sidebar({ onItemClick, selectedComponent }) {
 
 export default Sidebar;
 Sidebar.propTypes = {
-  onItemClick: PropTypes.func,
+  // onItemClick: PropTypes.func,
   selectedComponent: PropTypes.string,
 };

@@ -26,7 +26,7 @@ function AddProxy({ show, onHide }) {
         <div className="input_wrapper">
           <span className="select_title">Proxy Type</span>
           <select className="form-select" aria-label="Default select example">
-            <option selected>select</option>
+            <option defaultValue>select</option>
             <option value="1">HTTP</option>
             <option value="2">Socks5</option>
           </select>
