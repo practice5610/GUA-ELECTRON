@@ -3,3 +3,7 @@
   display: flex;
   justify-content: flex-end;
 }
+textarea.form-control {
+  background-color: #b8bbd3;
+  width: auto;
+}

@@ -39,11 +39,16 @@ const sidebar = [
   },
   {
     id: 7,
+    title: 'Messages',
+    path: '/dashboard/messages',
+  },
+  {
+    id: 8,
     title: 'LogIn',
     path: '/dashboard/login',
   },
   {
-    id: 8,
+    id: 9,
     title: 'SignUp',
     path: '/dashboard/signup',
   },

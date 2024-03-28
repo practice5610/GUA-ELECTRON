@@ -8,6 +8,7 @@ import Dm from '../Components/pages/dm/Dm';
 import Login from '../Components/pages/auth/Login';
 import SignUp from '../Components/pages/auth/SignUp';
 import Profile from '../Components/pages/profiles/Profile';
+import Messages from '../Components/pages/messages/Messages';
 
 export default function Router() {
   const routes = useRoutes([
@@ -21,6 +22,7 @@ export default function Router() {
         { path: 'prospects', element: <Prospects /> },
         { path: 'dm', element: <Dm /> },
         { path: 'profile', element: <Profile /> },
+        { path: 'messages', element: <Messages /> },
         { path: 'login', element: <Login /> },
         { path: 'signup', element: <SignUp /> },
       ],

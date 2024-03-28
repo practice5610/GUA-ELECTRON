@@ -30,12 +30,14 @@ export default function App() {
     <div>
       <div className="row g-0">
         <div className="col-2">
-          <Sidebar
-            selectedComponent={selectedComponent}
-            onItemClick={handleItemClick}
-          />
+          {token && (
+            <Sidebar
+              selectedComponent={selectedComponent}
+              onItemClick={handleItemClick}
+            />
+          )}
         </div>
-        <div className="col-10">
+        <div className={`${token ? 'col-10' : 'col-12'}`}>
           <Router />{' '}
         </div>
       </div>

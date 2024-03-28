@@ -35,7 +35,7 @@ function Dm() {
     <div className="wrapper">
       {!modalShow ? (
         <>
-          <h1 className="page_heading text-center">DM</h1>
+          <h1 className="page_heading ">DM</h1>
           <div className="container">
             <button className="btn_primary" onClick={() => setModalShow(true)}>
               Add Profile

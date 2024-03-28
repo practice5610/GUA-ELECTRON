@@ -3,6 +3,7 @@
 /* eslint-disable no-console */
 
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 import authServices from '../api/authServices';
 
 export const initialState = {
@@ -31,7 +32,8 @@ export const registerUser = createAsyncThunk(
       return res.data;
     } catch (error) {
       console.log(error);
-      return error?.response;
+      toast.error(error?.response?.data?.error?.message);
+      return error;
     }
   },
 );

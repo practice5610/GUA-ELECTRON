@@ -1,12 +1,22 @@
+/* eslint-disable no-console */
 /* eslint-disable react/button-has-type */
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import InputField from '../shared/InputField';
+import { addProfile } from '../../redux/slice/profileSlice';
 
 const initialValues = {
+  profileId: '',
+  serialNumber: '',
+  group: '',
   userName: '',
-  password: '',
+  platform: '',
 };
 function Api() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [values, setValue] = useState(initialValues);
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -14,6 +24,30 @@ function Api() {
       ...values,
       [name]: value,
     });
+  };
+
+  const handleSubmit = async () => {
+    const datas = {
+      ...values,
+      serialNumber: 3454656,
+      group: 'sample group',
+      userName: 'test',
+      platform: {
+        username: 'test',
+        password: 'test',
+      },
+    };
+
+    try {
+      const res = await dispatch(addProfile(datas));
+      console.log(res);
+      if (res?.payload?.success) {
+        toast.success(res?.payload?.message);
+        navigate('/dashboard/profile');
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="wrapper">
@@ -25,21 +59,17 @@ function Api() {
           for this to work{' '}
         </p>
         <InputField
-          title="Enter Username"
-          name="userName"
+          title="Enter ProfileId"
+          name="profileId"
           type="text"
-          value={values?.userName}
+          value={values?.profileId}
           onChange={handleOnChange}
         />
-        <InputField
-          title="Enter Password"
-          name="password"
-          type="password"
-          value={values?.password}
-          onChange={handleOnChange}
-        />
+
         <div className="w-full d-flex justify-content-center mt-4">
-          <button className="btn_tertiary ">Login</button>
+          <button className="btn_tertiary" onClick={handleSubmit}>
+            Add
+          </button>
         </div>
       </div>
     </div>

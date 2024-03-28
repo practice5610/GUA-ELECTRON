@@ -34,10 +34,14 @@ function Login() {
     try {
       const res = await dispatch(loginUser(datas));
       console.log(res);
-      toast.success(res?.payload?.data?.message);
-      setValue(initialValues);
+      if (res?.payload?.data?.status === 200) {
+        toast.success(res?.payload?.data?.message);
+        navigate('/dashboard/proxy_setting');
+        setValue(initialValues);
+      }
     } catch (error) {
       console.log(error);
+      toast.error(error?.response?.payload?.data?.message);
     }
   };
   return (

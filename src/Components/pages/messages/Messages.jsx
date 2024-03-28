@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
@@ -10,10 +9,10 @@ import {
   Popover,
   Pagination,
 } from 'react-bootstrap';
-import './styles.css';
+import '../profiles/styles.css';
 import { useDispatch, useSelector } from 'react-redux';
-import AddProfile from './AddProfile';
-import { getAllProfiles } from '../../../redux/slice/profileSlice';
+import AddMessage from './AddMessage';
+import { getAllMessage } from '../../../redux/slice/messageSlice';
 
 const tableHead = [
   {
@@ -22,19 +21,19 @@ const tableHead = [
   },
   {
     id: 2,
-    title: 'Serial Number',
+    title: 'userId',
   },
   {
     id: 3,
-    title: 'Group',
+    title: 'Username',
   },
   {
     id: 4,
-    title: 'Name',
+    title: 'Full Name',
   },
   {
     id: 5,
-    title: 'Platform',
+    title: 'message',
   },
   {
     id: 6,
@@ -42,17 +41,17 @@ const tableHead = [
   },
 ];
 
-function Profile() {
+function Messages() {
   const dispatch = useDispatch();
-  const profileData = useSelector((s) => s?.profile?.data?.data);
-  console.log(profileData);
+  const messageData = useSelector((s) => s?.message?.data?.data);
+  console.log(messageData);
   const [id, setId] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Number of items to show per page
   const [modalShow, setModalShow] = useState(false);
   console.log(modalShow);
   useEffect(() => {
-    dispatch(getAllProfiles());
+    dispatch(getAllMessage());
   }, [dispatch]);
   const handleEdit = () => {};
   const handleDelete = (itemId) => {
@@ -78,7 +77,7 @@ function Profile() {
   // Logic to calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = profileData?.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = messageData?.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage(currentPage + 1);
@@ -86,7 +85,7 @@ function Profile() {
 
   return (
     <div className="main_Wrapper wrapper">
-      <h1 className="page_heading">Profiles List</h1>
+      <h1 className="page_heading">Messages</h1>
       <div className="container btns_wrapper">
         <div className="left_btns">
           <button
@@ -95,10 +94,10 @@ function Profile() {
             onClick={() => setModalShow(true)}
           >
             <i className="bi bi-cloud-plus-fill  me-1" />
-            Add Profile
+            Add Message
           </button>
 
-          <AddProfile show={modalShow} onHide={() => setModalShow(false)} />
+          <AddMessage show={modalShow} onHide={() => setModalShow(false)} />
           <button type="button" className="btn_secondary">
             <i className="bi bi-search  me-1" /> Filter
           </button>
@@ -115,7 +114,7 @@ function Profile() {
       </div>
       <div className="container mt-2">
         <div className="table-responsive">
-          <table className="table">
+          <table className="table ">
             <thead>
               <tr>
                 {tableHead?.map((item) => (
@@ -127,7 +126,7 @@ function Profile() {
             </thead>
             <tbody>
               {currentItems?.map((item) => (
-                <tr key={item?._id}>
+                <tr key={item?.id}>
                   <td style={{ paddingLeft: '14px' }}>
                     <input
                       className="form-check-input"
@@ -137,10 +136,10 @@ function Profile() {
                     />
                   </td>
 
-                  <td>{item?.serialNumber}</td>
-                  <td>{item?.group}</td>
-                  <td>{item?.userName}</td>
-                  <td>{item?.profileId}</td>
+                  <td style={{ paddingLeft: '10px' }}>{item?.userId}</td>
+                  <td>{item?.target_username_name}</td>
+                  <td>{item?.target_full_name}</td>
+                  <td>{item?.message}</td>
                   <td>
                     <OverlayTrigger
                       trigger="click"
@@ -166,7 +165,7 @@ function Profile() {
         <Pagination className="pagination">
           <Pagination.Prev onClick={prevPage} disabled={currentPage === 1} />
           {Array.from({
-            length: Math.ceil(profileData?.length / itemsPerPage),
+            length: Math.ceil(messageData?.length / itemsPerPage),
           }).map((_, index) => (
             <Pagination.Item
               key={index}
@@ -179,7 +178,7 @@ function Profile() {
           <Pagination.Next
             onClick={nextPage}
             disabled={
-              currentPage === Math.ceil(profileData?.length / itemsPerPage)
+              currentPage === Math.ceil(messageData?.length / itemsPerPage)
             }
           />
         </Pagination>
@@ -188,4 +187,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default Messages;
