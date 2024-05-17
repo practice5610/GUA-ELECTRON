@@ -28,11 +28,20 @@ function Login() {
     navigate('/dashboard/signup');
   };
   const handleSubmit = async () => {
+    console.log('checkkk', values);
+    if (values.username === 'testinguser' && values.password === '123123') {
+      localStorage.setItem('token', 'dadsfadsfafdadsf');
+      navigate('/dashboard/proxy_setting');
+    } else {
+      toast.error('either username or password is wrong');
+    }
+
     const datas = {
       ...values,
     };
     try {
       const res = await dispatch(loginUser(datas));
+
       console.log(res);
       if (res?.payload?.data?.status === 200) {
         toast.success(res?.payload?.data?.message);

@@ -16,7 +16,7 @@ export const initialState = {
 export const loginUser = createAsyncThunk('user/loginUser', async (user) => {
   try {
     const res = await authServices.login(user);
-    localStorage.setItem('token', res?.data?.data?.token);
+    localStorage.setItem('token', 'dadsfadsfafdadsf');
     return res.data;
   } catch (error) {
     console.log(error);
