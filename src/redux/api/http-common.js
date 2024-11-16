@@ -1,7 +1,8 @@
 /* eslint-disable promise/no-promise-in-callback */
 import axios from 'axios';
 
-const apiUrl = 'https://wv9pfwh9-3008.inc1.devtunnels.ms/api';
+// const apiUrl = 'https://wv9pfwh9-3008.inc1.devtunnels.ms/api';
+const apiUrl = 'http://localhost:3000';
 
 export const callAPi = axios.create({
   baseURL: apiUrl,
