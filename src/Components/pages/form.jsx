@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
+
+import { useNavigate } from 'react-router-dom';
 import vfsServices from '../../redux/api/vfsServices';
 import 'bootstrap/dist/css/bootstrap.css';
 // you will also need the css that comes with bootstrap-daterangepicker
@@ -23,6 +25,16 @@ function FormE() {
     },
   });
 
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  console.log('token', token);
+
+  useEffect(() => {
+    if (token === null) {
+      navigate('/dashboard/login');
+    }
+  }, [navigate, token]);
+
   const handleSubmit = async (event) => {
     const form = event.currentTarget;
     event.preventDefault();
@@ -33,7 +45,7 @@ function FormE() {
       console.log('Form data to send:', formData);
 
       try {
-        const res = await vfsServices.login(formData); // Sending form data in API
+        const res = await vfsServices.autoLogin(formData); // Sending form data in API
         console.log('API Response:', res);
       } catch (error) {
         console.error('Error:', error);
@@ -96,6 +108,35 @@ function FormE() {
           </Form.Group>
         </Row>
         <Row className="mb-3">
+          <Form.Group as={Col} xs="6" controlId="validationCustom03">
+            <Form.Label>Select User Type</Form.Label>
+            <Form.Select
+              aria-label="Default select example"
+              name="visaCenter"
+              value={formData.visaCenter}
+              onChange={handleInputChange}
+            >
+              <option value="">-Select User Type-</option>
+              <option value="immigrant">Immigrant</option>
+              <option value="nonImmigrant">Nonimmigrant</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group as={Col} xs="6" controlId="validationCustom03">
+            <Form.Label>Select Visa Category</Form.Label>
+            <Form.Select
+              aria-label="Default select example"
+              name="visaCenter"
+              value={formData.visaCenter}
+              onChange={handleInputChange}
+            >
+              <option value="">-Select Visa Category-</option>
+              <option value="sb1">sb1</option>
+              <option value="lpr">lpr</option>
+            </Form.Select>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
           <Form.Group as={Col} xs="12" controlId="validationCustom03">
             <Form.Label>Select Visa Center</Form.Label>
             <Form.Select
@@ -104,12 +145,13 @@ function FormE() {
               value={formData.visaCenter}
               onChange={handleInputChange}
             >
-              <option value="">-Select Visa center-</option>
+              <option value="">-Select Visa Center-</option>
               <option value="Islamabad">Islamabad</option>
               <option value="Karachi">Karachi</option>
             </Form.Select>
           </Form.Group>
         </Row>
+
         <Row className="mb-3">
           <Form.Group as={Col} xs="12" controlId="validationCustom04">
             <Form.Label>Select Date</Form.Label>

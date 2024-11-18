@@ -4,8 +4,8 @@ import './App.css';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import FormE from '../Components/pages/form';
-// import Router from './routes';
+// import FormE from '../Components/pages/form';
+import Router from './routes';
 
 export default function App() {
   return (
@@ -17,10 +17,10 @@ export default function App() {
             onItemClick={handleItemClick}
           />
         </div> */}
-        {/* <div className="col-12">
+        <div className="col-12">
           <Router />{' '}
-        </div> */}
-        <FormE />
+        </div>
+        {/* <FormE /> */}
       </div>
     </div>
   );

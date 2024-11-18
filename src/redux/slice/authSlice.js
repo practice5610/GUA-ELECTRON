@@ -5,6 +5,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 import authServices from '../api/authServices';
+import vfsServices from '../api/vfsServices';
 
 export const initialState = {
   data: [],
@@ -15,7 +16,7 @@ export const initialState = {
 
 export const loginUser = createAsyncThunk('user/loginUser', async (user) => {
   try {
-    const res = await authServices.login(user);
+    const res = await vfsServices.login(user);
     localStorage.setItem('token', res?.data?.data?.token);
     return res.data;
   } catch (error) {

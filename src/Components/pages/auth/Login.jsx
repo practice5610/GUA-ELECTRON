@@ -2,89 +2,88 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-import InputField from '../../shared/InputField';
-import { loginUser } from '../../../redux/slice/authSlice';
 
-const initialValues = {
-  username: '',
-  password: '',
-};
+import { Button, Col, Container, Form, Row } from 'react-bootstrap';
+
+import vfsServices from '../../../redux/api/vfsServices';
+
 function Login() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [values, setValue] = useState(initialValues);
-  const handleOnChange = (e) => {
+  const [validated, setValidated] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const handleSubmit = async (event) => {
+    const form = event.currentTarget;
+    event.preventDefault();
+
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+    } else {
+      console.log('Form data to send:', formData);
+
+      try {
+        const res = await vfsServices.login(formData); // Sending form data in API
+        console.log('API Response:', res);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    setValidated(true);
+  };
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setValue({
-      ...values,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
-  const handleRegisterClick = () => {
-    navigate('/dashboard/signup');
-  };
-  const handleSubmit = async () => {
-    const datas = {
-      ...values,
-    };
-    try {
-      const res = await dispatch(loginUser(datas));
-      console.log(res);
-      if (res?.payload?.data?.status === 200) {
-        toast.success(res?.payload?.data?.message);
-        navigate('/dashboard/proxy_setting');
-        setValue(initialValues);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.payload?.data?.message);
-    }
-  };
   return (
-    <div className="wrapper">
-      <h1 className="page_heading text-center">Log In</h1>
-      <div>
-        <InputField
-          title="Enter Username"
-          name="username"
-          type="text"
-          value={values?.username}
-          onChange={handleOnChange}
-        />
-        <InputField
-          title="Enter Password"
-          name="password"
-          type="password"
-          value={values?.password}
-          onChange={handleOnChange}
-        />
-        <div className="w-full d-flex justify-content-center mt-4">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="btn_tertiary "
-          >
-            Log In
-          </button>
-        </div>
-        <div className="d-flex flex-column justify-content-center align-items-center mt-3">
-          <span style={{ color: '#b8bbd3' }}>dont have an account? </span>
-          <p
-            style={{
-              color: '#50f5ac',
-              cursor: 'pointer',
-            }}
-            onClick={handleRegisterClick}
-          >
-            register
-          </p>
-        </div>
-      </div>
-    </div>
+    <Container
+      style={{
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        <Row className="mb-3">
+          <Form.Group as={Col} xs="12" controlId="validationCustom01">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              placeholder="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} xs="12" controlId="validationCustom02">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              required
+              type="password"
+              placeholder="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+            />
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
+          <Button style={{ textAlign: 'center' }} type="submit">
+            Login
+          </Button>
+        </Row>
+      </Form>
+    </Container>
   );
 }
 
