@@ -5,9 +5,12 @@ import React, { useState } from 'react';
 
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import vfsServices from '../../../redux/api/vfsServices';
 
 function Login() {
+  const navigate = useNavigate();
   const [validated, setValidated] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -26,6 +29,11 @@ function Login() {
       try {
         const res = await vfsServices.login(formData); // Sending form data in API
         console.log('API Response:', res);
+        if (res.status === 200) {
+          localStorage.setItem('token', res?.data?.token);
+          toast.success(res?.data?.message);
+          navigate('/dashboard/form');
+        }
       } catch (error) {
         console.error('Error:', error);
       }

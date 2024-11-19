@@ -12,6 +12,7 @@ import vfsServices from '../../redux/api/vfsServices';
 import 'bootstrap/dist/css/bootstrap.css';
 // you will also need the css that comes with bootstrap-daterangepicker
 import 'bootstrap-daterangepicker/daterangepicker.css';
+import { toast } from 'react-toastify';
 
 function FormE() {
   const [validated, setValidated] = useState(false);
@@ -73,6 +74,12 @@ function FormE() {
     }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    toast.success('logout successful');
+    navigate('/dashboard/form');
+  };
+
   return (
     <Container
       style={{
@@ -82,6 +89,9 @@ function FormE() {
         height: '100vh',
       }}
     >
+      <div style={{ position: 'absolute', right: '10px', top: '10px' }}>
+        <Button onClick={handleLogout}>Log out</Button>
+      </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Row className="mb-3">
           <Form.Group as={Col} xs="6" controlId="validationCustom01">
