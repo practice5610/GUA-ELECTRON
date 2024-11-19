@@ -1,10 +1,5 @@
-/* eslint-disable no-console */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { useState } from 'react';
-
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
-
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import vfsServices from '../../../redux/api/vfsServices';
@@ -12,6 +7,7 @@ import vfsServices from '../../../redux/api/vfsServices';
 function Login() {
   const navigate = useNavigate();
   const [validated, setValidated] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,27 +16,29 @@ function Login() {
   const handleSubmit = async (event) => {
     const form = event.currentTarget;
     event.preventDefault();
-
+    setisLoading(true);
     if (form.checkValidity() === false) {
       event.stopPropagation();
+      setisLoading(false);
     } else {
-      console.log('Form data to send:', formData);
-
       try {
         const res = await vfsServices.login(formData); // Sending form data in API
-        console.log('API Response:', res);
+
         if (res.status === 200) {
+          setisLoading(false);
           localStorage.setItem('token', res?.data?.token);
           toast.success(res?.data?.message);
           navigate('/dashboard/form');
         }
       } catch (error) {
         console.error('Error:', error);
+        toast.error('Login failed. Please check your credentials.');
       }
     }
 
     setValidated(true);
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -64,7 +62,7 @@ function Login() {
             <Form.Label>Email</Form.Label>
             <Form.Control
               required
-              type="text"
+              type="email" // Changed to "email" for better semantics and validation
               placeholder="Email"
               name="email"
               value={formData.email}
@@ -86,7 +84,11 @@ function Login() {
           </Form.Group>
         </Row>
         <Row className="mb-3">
-          <Button style={{ textAlign: 'center' }} type="submit">
+          <Button
+            disabled={isLoading}
+            style={{ textAlign: 'center' }}
+            type="submit"
+          >
             Login
           </Button>
         </Row>
