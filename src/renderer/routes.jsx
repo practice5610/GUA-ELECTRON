@@ -28,11 +28,12 @@ function ProtectedRoute({ children }) {
 export default function Router() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  console.log('token', token);
-
   useEffect(() => {
-    if (token === null) {
+    console.log('checktoken', token);
+    if (!token) {
       navigate('/dashboard/login');
+    } else {
+      navigate('/dashboard/form');
     }
   }, [navigate, token]);
   const routes = useRoutes([
