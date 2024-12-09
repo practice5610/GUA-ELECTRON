@@ -1,10 +1,20 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css';
 import Hello from './Test';
 import Login from './Login';
+
+function PrivateRoute({ children }: { children: JSX.Element }) {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/" />;
+}
 
 export default function App() {
   return (
@@ -12,7 +22,18 @@ export default function App() {
       {/* Router setup */}
       <Router>
         <Routes>
+          {/* Login route */}
           <Route path="/" element={<Login />} />
+
+          {/* Protected route */}
+          <Route
+            path="/test"
+            element={
+              <PrivateRoute>
+                <Hello />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </Router>
 
