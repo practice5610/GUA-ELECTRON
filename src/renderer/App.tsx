@@ -8,11 +8,12 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css';
-import Hello from './Test';
 import Login from './Login';
+import FormE from './Test';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem('token');
+  console.log('cehcktoken', token);
   return token ? children : <Navigate to="/" />;
 }
 
@@ -27,10 +28,10 @@ export default function App() {
 
           {/* Protected route */}
           <Route
-            path="/test"
+            path="/form"
             element={
               <PrivateRoute>
-                <Hello />
+                <FormE />
               </PrivateRoute>
             }
           />

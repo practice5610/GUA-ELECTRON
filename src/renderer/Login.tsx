@@ -39,7 +39,7 @@ function Login() {
         setIsLoading(false);
         localStorage.setItem('token', res.data.token); // Save token in localStorage
         toast.success(res.data.message || 'Login successful');
-        navigate('/test'); // Redirect to the dashboard
+        navigate('/form'); // Redirect to the dashboard
       }
     } catch (error) {
       setIsLoading(false);
