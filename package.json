@@ -21,8 +21,8 @@
   },
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
+    "name": "Asim Ali",
+    "email": "asim56101@gmail.com",
     "url": "https://electron-react-boilerplate.js.org"
   },
   "contributors": [
@@ -175,7 +175,7 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
+    "productName": "Us Appointments",
     "appId": "org.erb.ElectronReact",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",

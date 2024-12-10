@@ -26,7 +26,7 @@ function FormE() {
 
   useEffect(() => {
     if (token === null) {
-      navigate('/dashboard/login');
+      navigate('/');
     }
   }, [navigate, token]);
 
@@ -38,6 +38,7 @@ function FormE() {
       event.stopPropagation();
     } else {
       console.log('Form data to send:', formData);
+      window.electron.ipcRenderer.sendMessage('login-event', formData);
     }
 
     setValidated(true);
@@ -64,7 +65,7 @@ function FormE() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     toast.success('logout successful');
-    navigate('/dashboard/form');
+    navigate('/');
   };
 
   return (

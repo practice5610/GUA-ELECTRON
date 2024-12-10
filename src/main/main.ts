@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer-core';
+
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
@@ -21,6 +22,7 @@ ipcMain.on('ipc-example', async (event, arg) => {
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const openGoogleInChrome = async (url: string) => {
   try {
@@ -38,8 +40,87 @@ const openGoogleInChrome = async (url: string) => {
     console.error('Failed to open the URL in Chrome:', error);
   }
 };
-ipcMain.on('url-event', (event, url) => {
-  openGoogleInChrome(url);
+const performLogin = async (email: string, password: string) => {
+  try {
+    const browser = await puppeteer.launch({
+      executablePath:
+        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Adjust the path as needed
+      headless: false,
+      fingerprint: true,
+      ignoreHTTPSErrors: true,
+      defaultViewport: null,
+      args: ['--no-sandbox'],
+    });
+
+    const page = await browser.newPage();
+
+    await page.goto('https://portal.ustraveldocs.com', {
+      waitUntil: 'load',
+      timeout: 0,
+    });
+    await sleep(3000);
+    // Ensure the element is available (increase timeout if necessary)
+    await page.waitForSelector(
+      '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
+      { timeout: 20000 }, // Increase timeout
+    );
+
+    console.log('Username field is visible');
+
+    // Fill in the username
+    await page.type(
+      '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
+      email,
+      { delay: 50 },
+    );
+
+    // Fill in the password
+    await page.type(
+      '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:password',
+      password,
+      { delay: 50 },
+    );
+
+    // Wait for the checkbox to be visible
+    const checkboxSelector =
+      'input[name="loginPage:SiteTemplate:siteLogin:loginComponent:loginForm:j_id167"]';
+    await page.waitForSelector(checkboxSelector, { visible: true });
+    await page.click(checkboxSelector);
+
+    // Click the login button
+    await page.click(
+      '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:loginButton',
+    );
+
+    // Wait for either navigation or an error message
+    const errorSelector =
+      '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:error\\:j_id132\\:j_id133\\:0\\:j_id134';
+    const navigationPromise = page.waitForNavigation({
+      waitUntil: 'networkidle2',
+    });
+    const errorPromise = page.waitForSelector(errorSelector, { visible: true });
+
+    const result = await Promise.race([navigationPromise, errorPromise]);
+
+    if (result === errorPromise) {
+      console.error('Login failed: Invalid username or password.');
+      return false;
+    }
+    await sleep(4000);
+    await page.close();
+    console.log('Login successful!');
+    return await page.cookies();
+  } catch (error) {
+    // Debug: print the current page's content
+    console.error('Error during login:', error);
+    const content = await page.content();
+    console.log('Page content:', content);
+    return false;
+  }
+};
+ipcMain.on('login-event', (event, data) => {
+  console.log('cehckdata', data);
+  performLogin(data.email, data.password);
 });
 
 if (process.env.NODE_ENV === 'production') {

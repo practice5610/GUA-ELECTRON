@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Import Axios
 
 function Login() {
   const navigate = useNavigate();
@@ -13,7 +12,7 @@ function Login() {
     password: '',
   });
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     const form = event.currentTarget;
     event.preventDefault();
     setIsLoading(true);
@@ -25,28 +24,18 @@ function Login() {
       return;
     }
 
-    try {
-      // Make an API call using Axios
-      const res = await axios.post(
-        'http://localhost:3000/admin/login',
-        formData,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-
-      if (res.status === 200) {
-        setIsLoading(false);
-        localStorage.setItem('token', res.data.token); // Save token in localStorage
-        toast.success(res.data.message || 'Login successful');
-        navigate('/form'); // Redirect to the dashboard
-      }
-    } catch (error) {
+    // Simulate login logic
+    if (
+      formData.email === 'admin123@gmail.com' &&
+      formData.password === 'usAppointment!'
+    ) {
       setIsLoading(false);
-      console.error('Error:', error.response || error.message);
-      toast.error(
-        error.response?.data?.message || 'Login failed. Please try again.',
-      );
+      toast.success('Login successful');
+      localStorage.setItem('token', '123133');
+      navigate('/form'); // Redirect to the dashboard
+    } else {
+      setIsLoading(false);
+      toast.error('Invalid credentials. Please try again.');
     }
   };
 

@@ -14,7 +14,7 @@ import FormE from './Test';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem('token');
-  console.log('checkToken', token);
+
   return token ? children : <Navigate to="/" />;
 }
 
@@ -23,7 +23,6 @@ function AppRoutes() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    console.log('checkToken:', token);
     if (!token) {
       navigate('/');
     } else {
