@@ -81,9 +81,14 @@ function FormE() {
         <Button onClick={handleLogout}>Log out</Button>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Row className="mb-3">
-          <Form.Group as={Col} xs="6" controlId="validationCustom01">
-            <Form.Label>Email</Form.Label>
+        <Row className="mb-3 mbc flex-row">
+          <Form.Group
+            as={Col}
+            xs="6"
+            className="group"
+            controlId="validationCustom01"
+          >
+            <Form.Label className="label">Email</Form.Label>
             <Form.Control
               required
               type="text"
@@ -91,10 +96,16 @@ function FormE() {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
+              className="inputs"
             />
           </Form.Group>
-          <Form.Group as={Col} xs="6" controlId="validationCustom02">
-            <Form.Label>Password</Form.Label>
+          <Form.Group
+            as={Col}
+            xs="6"
+            className="group"
+            controlId="validationCustom02"
+          >
+            <Form.Label className="label">Password</Form.Label>
             <Form.Control
               required
               type="password"
@@ -102,29 +113,46 @@ function FormE() {
               name="password"
               value={formData.password}
               onChange={handleInputChange}
+              className="inputs"
             />
           </Form.Group>
         </Row>
-        <Row className="mb-3">
-          <Form.Group as={Col} xs="6" controlId="validationCustom03">
-            <Form.Label>Select User Type</Form.Label>
+        <Row className="mb-3 flex-row mbc">
+          <Form.Group
+            as={Col}
+            xs="12"
+            style={{ width: '100%' }}
+            className="group"
+            controlId="validationCustom03"
+          >
+            <Form.Label className="label">Select User Type</Form.Label>
             <Form.Select
               aria-label="Default select example"
               name="visaCenter"
               value={formData.visaCenter}
               onChange={handleInputChange}
+              className="inputs"
             >
               <option value="">-Select User Type-</option>
               <option value="immigrant">Immigrant</option>
               <option value="nonImmigrant">Nonimmigrant</option>
             </Form.Select>
           </Form.Group>
-          <Form.Group as={Col} xs="6" controlId="validationCustom03">
-            <Form.Label>Select Visa Category</Form.Label>
+        </Row>
+        <Row className="mb-3 flex-row mbc">
+          <Form.Group
+            as={Col}
+            xs="12"
+            style={{ width: '100%' }}
+            className="group"
+            controlId="validationCustom03"
+          >
+            <Form.Label className="label">Select Visa Category</Form.Label>
             <Form.Select
               aria-label="Default select example"
               name="visaCenter"
               value={formData.visaCenter}
+              className="inputs"
               onChange={handleInputChange}
             >
               <option value="">-Select Visa Category-</option>
@@ -134,13 +162,20 @@ function FormE() {
           </Form.Group>
         </Row>
 
-        <Row className="mb-3">
-          <Form.Group as={Col} xs="12" controlId="validationCustom03">
-            <Form.Label>Select Visa Center</Form.Label>
+        <Row className="mb-3 flex-row mbc">
+          <Form.Group
+            as={Col}
+            xs="12"
+            style={{ width: '100%' }}
+            className="group"
+            controlId="validationCustom03"
+          >
+            <Form.Label className="label">Select Visa Center</Form.Label>
             <Form.Select
               aria-label="Default select example"
               name="visaCenter"
               value={formData.visaCenter}
+              className="inputs"
               onChange={handleInputChange}
             >
               <option value="">-Select Visa Center-</option>
@@ -149,28 +184,9 @@ function FormE() {
             </Form.Select>
           </Form.Group>
         </Row>
-
-        {/* <Row className="mb-3">
-          <Form.Group as={Col} xs="12" controlId="validationCustom04">
-            <Form.Label>Select Date</Form.Label>
-            <DateRangePicker
-              initialSettings={{
-                startDate: '01/01/2020',
-                endDate: '01/15/2020',
-              }}
-              onApply={handleDateChange}
-            >
-              <input
-                type="text"
-                className="form-control"
-                placeholder={`${formData.dateRange.startDate} - ${formData.dateRange.endDate}`}
-                readOnly
-              />
-            </DateRangePicker>
-          </Form.Group>
-        </Row> */}
-
-        <Button type="submit">Submit form</Button>
+        <Row className="mb-3" style={{ textAlign: 'center' }}>
+          <Button type="submit">Submit form</Button>
+        </Row>
       </Form>
     </Container>
   );

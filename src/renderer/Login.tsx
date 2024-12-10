@@ -57,9 +57,14 @@ function Login() {
       }}
     >
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Row className="mb-3">
-          <Form.Group as={Col} xs="12" controlId="validationCustom01">
-            <Form.Label>Email</Form.Label>
+        <Row className="mb-3 mbc">
+          <Form.Group
+            as={Col}
+            xs="12"
+            className="group"
+            controlId="validationCustom01"
+          >
+            <Form.Label className="label">Email</Form.Label>
             <Form.Control
               required
               type="email"
@@ -67,12 +72,18 @@ function Login() {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
+              className="inputs"
             />
           </Form.Group>
         </Row>
-        <Row className="mb-3">
-          <Form.Group as={Col} xs="12" controlId="validationCustom02">
-            <Form.Label>Password</Form.Label>
+        <Row className="mb-3 mbc">
+          <Form.Group
+            as={Col}
+            xs="12"
+            className="group"
+            controlId="validationCustom02"
+          >
+            <Form.Label className="label">Password</Form.Label>
             <Form.Control
               required
               type="password"
@@ -80,10 +91,11 @@ function Login() {
               name="password"
               value={formData.password}
               onChange={handleInputChange}
+              className="inputs"
             />
           </Form.Group>
         </Row>
-        <Row className="mb-3">
+        <Row className="mb-3" style={{ textAlign: 'center' }}>
           <Button
             disabled={isLoading}
             style={{ textAlign: 'center' }}
