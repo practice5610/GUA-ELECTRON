@@ -26,7 +26,21 @@ const configuration: webpack.Configuration = {
     main: path.join(webpackPaths.srcMainPath, 'main.ts'),
     preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
   },
-
+  module: {
+    rules: [
+      // Add rule for handling `.node` files
+      {
+        test: /\.node$/,
+        use: 'node-loader',
+      },
+    ],
+  },
+  externals: [
+    // Mark native modules as external
+    'fsevents',
+    'crypto-browserify',
+    'sleep',
+  ],
   output: {
     path: webpackPaths.distMainPath,
     filename: '[name].js',

@@ -23,12 +23,21 @@ const configuration: webpack.Configuration = {
 
   target: 'electron-renderer',
 
-  externals: ['fsevents', 'crypto-browserify'],
-
-  /**
-   * Use `module` from `webpack.config.renderer.dev.js`
-   */
-  module: require('./webpack.config.renderer.dev').default.module,
+  module: {
+    rules: [
+      {
+        test: /\.node$/,
+        use: 'node-loader',
+      },
+      ...require('./webpack.config.renderer.dev').default.module.rules,
+    ],
+  },
+  externals: [
+    'fsevents',
+    'crypto-browserify',
+    'puppeteer-real-browser',
+    'sleep',
+  ],
 
   entry: {
     renderer: Object.keys(dependencies || {}),

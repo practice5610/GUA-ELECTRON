@@ -1,4 +1,5 @@
-import puppeteer from 'puppeteer-core';
+// import puppeteer from 'puppeteer-core';
+import { connect } from 'puppeteer-real-browser';
 
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
@@ -24,35 +25,31 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const openGoogleInChrome = async (url: string) => {
-  try {
-    const browser = await puppeteer.launch({
-      headless: false, // Set to false to see the Chrome window
-      executablePath:
-        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Adjust the path as needed
-      args: ['--no-sandbox', '--disable-setuid-sandbox'], // Necessary for some environments
-    });
+// const openGoogleInChrome = async (url: string) => {
+//   try {
+//     const browser = await puppeteer.launch({
+//       headless: false, // Set to false to see the Chrome window
+//       executablePath:
+//         'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Adjust the path as needed
+//       args: ['--no-sandbox', '--disable-setuid-sandbox'], // Necessary for some environments
+//     });
 
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-    console.log(`Opened ${url} in a separate Chrome window.`);
-  } catch (error) {
-    console.error('Failed to open the URL in Chrome:', error);
-  }
-};
+//     const page = await browser.newPage();
+//     await page.goto(url, { waitUntil: 'domcontentloaded' });
+//     console.log(`Opened ${url} in a separate Chrome window.`);
+//   } catch (error) {
+//     console.error('Failed to open the URL in Chrome:', error);
+//   }
+// };
 const performLogin = async (email: string, password: string) => {
   try {
-    const browser = await puppeteer.launch({
-      executablePath:
-        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Adjust the path as needed
+    const { page } = await connect({
       headless: false,
       fingerprint: true,
       ignoreHTTPSErrors: true,
       defaultViewport: null,
       args: ['--no-sandbox'],
     });
-
-    const page = await browser.newPage();
 
     await page.goto('https://portal.ustraveldocs.com', {
       waitUntil: 'load',
