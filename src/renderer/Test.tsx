@@ -5,7 +5,6 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { useNavigate } from 'react-router-dom';
-// you will also need the css that comes with bootstrap-daterangepicker
 import { toast } from 'react-toastify';
 
 function FormE() {
@@ -13,6 +12,8 @@ function FormE() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    userType: '',
+    visaCategory: '',
     visaCenter: '',
     dateRange: {
       startDate: '',
@@ -22,7 +23,6 @@ function FormE() {
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  console.log('token', token);
 
   useEffect(() => {
     if (token === null) {
@@ -49,16 +49,6 @@ function FormE() {
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
-    }));
-  };
-
-  const handleDateChange = (event, picker) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      dateRange: {
-        startDate: picker.startDate.format('YYYY-MM-DD'),
-        endDate: picker.endDate.format('YYYY-MM-DD'),
-      },
     }));
   };
 
@@ -128,8 +118,8 @@ function FormE() {
             <Form.Label className="label">Select User Type</Form.Label>
             <Form.Select
               aria-label="Default select example"
-              name="visaCenter"
-              value={formData.visaCenter}
+              name="userType"
+              value={formData.userType}
               onChange={handleInputChange}
               className="inputs"
             >
@@ -150,18 +140,18 @@ function FormE() {
             <Form.Label className="label">Select Visa Category</Form.Label>
             <Form.Select
               aria-label="Default select example"
-              name="visaCenter"
-              value={formData.visaCenter}
-              className="inputs"
+              name="visaCategory"
+              value={formData.visaCategory}
               onChange={handleInputChange}
+              className="inputs"
             >
               <option value="">-Select Visa Category-</option>
-              <option value="sb1">sb1</option>
-              <option value="lpr">lpr</option>
+              <option value="B1">B1</option>
+              <option value="B2">B2</option>
+              <option value="b1/b2">b1/b2</option>
             </Form.Select>
           </Form.Group>
         </Row>
-
         <Row className="mb-3 flex-row mbc">
           <Form.Group
             as={Col}
@@ -175,8 +165,8 @@ function FormE() {
               aria-label="Default select example"
               name="visaCenter"
               value={formData.visaCenter}
-              className="inputs"
               onChange={handleInputChange}
+              className="inputs"
             >
               <option value="">-Select Visa Center-</option>
               <option value="Islamabad">Islamabad</option>
