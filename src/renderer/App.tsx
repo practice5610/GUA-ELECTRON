@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import Login from './Login';
 import FormE from './Test';
+import Users from './users';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem('token');
@@ -25,8 +26,6 @@ function AppRoutes() {
   useEffect(() => {
     if (!token) {
       navigate('/');
-    } else {
-      navigate('/form');
     }
   }, [navigate, token]);
 
@@ -41,6 +40,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <FormE />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <PrivateRoute>
+            <Users />
           </PrivateRoute>
         }
       />
