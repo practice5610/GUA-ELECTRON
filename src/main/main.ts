@@ -1,13 +1,15 @@
 // import puppeteer from 'puppeteer-core';
 import { connect } from 'puppeteer-real-browser';
 
-import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import path from 'path';
+import fs from 'fs/promises';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+const COOKIES_DIR = '../cookies';
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -24,7 +26,58 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', msgTemplate('pong'));
 });
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const ensureCookiesDir = async () => {
+  try {
+    await fs.mkdir(COOKIES_DIR, { recursive: true });
+  } catch (error) {
+    console.error('Error ensuring cookies directory:', error);
+  }
+};
 
+// Save cookies for a user
+const saveUserCookies = async (email: string, cookies: any) => {
+  try {
+    await ensureCookiesDir();
+    const filePath = path.join(COOKIES_DIR, `${email}.json`);
+    await fs.writeFile(filePath, JSON.stringify(cookies, null, 2));
+    console.log(`Cookies saved for user: ${email}`);
+  } catch (error) {
+    console.error('Error saving user cookies:', error);
+  }
+};
+
+// Get all users' cookies
+const getAllUsersCookies = async () => {
+  try {
+    await ensureCookiesDir();
+    const files = await fs.readdir(COOKIES_DIR);
+    const cookies = await Promise.all(
+      files.map(async (file) => {
+        const filePath = path.join(COOKIES_DIR, file);
+        const data = await fs.readFile(filePath, 'utf-8');
+        return {
+          email: path.basename(file, '.json'),
+          cookies: JSON.parse(data),
+        };
+      }),
+    );
+    return cookies;
+  } catch (error) {
+    console.error('Error retrieving all users cookies:', error);
+    return [];
+  }
+};
+const getUserCookiesByEmail = async (email: string) => {
+  try {
+    await ensureCookiesDir();
+    const filePath = path.join(COOKIES_DIR, `${email}.json`);
+    const data = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error(`Error retrieving cookies for user ${email}:`, error);
+    return null;
+  }
+};
 // const openGoogleInChrome = async (url: string) => {
 //   try {
 //     const browser = await puppeteer.launch({
@@ -50,16 +103,19 @@ const performLogin = async (email: string, password: string) => {
       defaultViewport: null,
       args: ['--no-sandbox'],
     });
+    page.setDefaultTimeout(120000);
+    await page.goto('https://portal.ustraveldocs.com');
 
-    await page.goto('https://portal.ustraveldocs.com', {
-      waitUntil: 'load',
-      timeout: 0,
+    await page.waitForNavigation({
+      waitUntil: 'networkidle0',
     });
+
     await sleep(3000);
+    console.log('loadeddd-----');
     // Ensure the element is available (increase timeout if necessary)
     await page.waitForSelector(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
-      { timeout: 20000 }, // Increase timeout
+      { timeout: 60000 }, // Increase timeout
     );
 
     console.log('Username field is visible');
@@ -78,7 +134,6 @@ const performLogin = async (email: string, password: string) => {
       { delay: 50 },
     );
 
-    // Wait for the checkbox to be visible
     const checkboxSelector =
       'input[name="loginPage:SiteTemplate:siteLogin:loginComponent:loginForm:j_id167"]';
     await page.waitForSelector(checkboxSelector, { visible: true });
@@ -90,33 +145,30 @@ const performLogin = async (email: string, password: string) => {
     );
 
     // Wait for either navigation or an error message
-    const errorSelector =
-      '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:error\\:j_id132\\:j_id133\\:0\\:j_id134';
-    const navigationPromise = page.waitForNavigation({
-      waitUntil: 'networkidle2',
+    await page.waitForNavigation({
+      waitUntil: 'networkidle0',
     });
-    const errorPromise = page.waitForSelector(errorSelector, { visible: true });
-
-    const result = await Promise.race([navigationPromise, errorPromise]);
-
-    if (result === errorPromise) {
-      console.error('Login failed: Invalid username or password.');
+    await sleep(8000);
+    const currentUrl = page.url();
+    console.log(`urll: ${currentUrl}`);
+    if (currentUrl === 'https://portal.ustraveldocs.com/applicanthome') {
+      console.log('user logged in succcessfully');
+      const cookies = await page.cookies();
+      await saveUserCookies(email, cookies);
+      return true;
+    } else {
       return false;
     }
-    await sleep(4000);
-    await page.close();
-    console.log('Login successful!');
-    return await page.cookies();
+
+    // await page.close();
   } catch (error) {
-    // Debug: print the current page's content
     console.error('Error during login:', error);
-    const content = await page.content();
-    console.log('Page content:', content);
+
     return false;
   }
 };
 ipcMain.on('login-event', (event, data) => {
-  console.log('cehckdata', data);
+  // console.log('cehckdata', data);
   performLogin(data.email, data.password);
 });
 
