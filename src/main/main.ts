@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-const COOKIES_DIR = '../cookies';
+const COOKIES_DIR = './cookies';
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
