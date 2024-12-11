@@ -189,6 +189,17 @@ const performLogin = async (email: string, password: string) => {
     return false;
   }
 };
+ipcMain.on('get-users', async (event) => {
+  try {
+    const users = await getAllUsersCookies(); // Wait for the promise to resolve
+    console.log('users', users); // Logs the resolved users array
+    event.sender.send('users-data', users); // Send the resolved data back to the renderer
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    event.sender.send('users-data-error', 'Failed to fetch users');
+  }
+});
+
 ipcMain.on('login-event', (event, data) => {
   // console.log('cehckdata', data);
   performLogin(data.email, data.password);

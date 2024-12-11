@@ -98,6 +98,7 @@ function Login() {
         <Row className="mb-3" style={{ textAlign: 'center' }}>
           <Button
             disabled={isLoading}
+            className="primary-btn"
             style={{ textAlign: 'center' }}
             type="submit"
           >

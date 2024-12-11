@@ -67,11 +67,25 @@ function FormE() {
         height: '100vh',
       }}
     >
-      <div style={{ position: 'absolute', right: '10px', top: '10px' }}>
-        <Button onClick={handleLogout}>Log out</Button>
+      <div
+        style={{
+          position: 'absolute',
+
+          top: '10px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
+      >
+        <Button className="primary-btn" onClick={() => navigate('/users')}>
+          Users
+        </Button>
+        <Button className="primary-btn" onClick={handleLogout}>
+          Log out
+        </Button>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Row className="mb-3 mbc flex-row">
+        <Row className=" mbc flex-row">
           <Form.Group
             as={Col}
             xs="6"
@@ -107,7 +121,7 @@ function FormE() {
             />
           </Form.Group>
         </Row>
-        <Row className="mb-3 flex-row mbc">
+        <Row className=" flex-row mbc">
           <Form.Group
             as={Col}
             xs="12"
@@ -129,7 +143,7 @@ function FormE() {
             </Form.Select>
           </Form.Group>
         </Row>
-        <Row className="mb-3 flex-row mbc">
+        <Row className=" flex-row mbc">
           <Form.Group
             as={Col}
             xs="12"
@@ -152,7 +166,7 @@ function FormE() {
             </Form.Select>
           </Form.Group>
         </Row>
-        <Row className="mb-3 flex-row mbc">
+        <Row className=" flex-row mbc">
           <Form.Group
             as={Col}
             xs="12"
@@ -174,8 +188,10 @@ function FormE() {
             </Form.Select>
           </Form.Group>
         </Row>
-        <Row className="mb-3" style={{ textAlign: 'center' }}>
-          <Button type="submit">Submit form</Button>
+        <Row className="" style={{ textAlign: 'center' }}>
+          <Button className="primary-btn" type="submit">
+            Submit form
+          </Button>
         </Row>
       </Form>
     </Container>
