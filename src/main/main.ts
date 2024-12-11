@@ -35,14 +35,36 @@ const ensureCookiesDir = async () => {
 };
 
 // Save cookies for a user
-const saveUserCookies = async (email: string, cookies: any) => {
+const saveUserCookies = async (email: string, cookies: any[]) => {
   try {
     await ensureCookiesDir();
-    const filePath = path.join(COOKIES_DIR, `${email}.json`);
-    await fs.writeFile(filePath, JSON.stringify(cookies, null, 2));
+
+    // List of cookie names to exclude
+    const excludedCookieNames = [
+      '__cf_bm',
+      '__utmz',
+      '__utma',
+      '__utmt',
+      'LSKey-c$CookieConsentPolicy',
+      'CookieConsentPolicy',
+      '__utmc',
+      '__utmb',
+      'cf_clearance',
+    ];
+
+    // Filter out cookies with excluded names
+    const filteredCookies = cookies.filter(
+      (cookie) => !excludedCookieNames.includes(cookie.name),
+    );
+    console.log('cehckfiltered', filteredCookies);
+    if (filteredCookies.length > 0) {
+      const filePath = path.join(COOKIES_DIR, `${email}.json`);
+
+      await fs.writeFile(filePath, JSON.stringify(filteredCookies, null, 2));
+    }
     console.log(`Cookies saved for user: ${email}`);
   } catch (error) {
-    console.error('Error saving user cookies:', error);
+    console.error('Error saving user cookies:', error.message);
   }
 };
 
