@@ -8,6 +8,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { CookieParam } from 'puppeteer-core';
 
 const COOKIES_DIR = './cookies';
 class AppUpdater {
@@ -189,10 +190,45 @@ const performLogin = async (email: string, password: string) => {
     return false;
   }
 };
+const performReLogin = async (cookies: CookieParam[]) => {
+  try {
+    const { page } = await connect({
+      headless: false,
+      fingerprint: true,
+      ignoreHTTPSErrors: true,
+      defaultViewport: null,
+      args: ['--no-sandbox'],
+    });
+
+    page.setDefaultTimeout(120000);
+    await page.goto('https://portal.ustraveldocs.com');
+
+    await page.waitForNavigation({
+      waitUntil: 'networkidle0',
+    });
+
+    await sleep(3000);
+    console.log('loadeddd-----cookies');
+
+    // Spread the cookies array
+    await page.setCookie(...cookies);
+    await page.goto('https://portal.ustraveldocs.com/applicanthome');
+
+    await page.waitForNavigation({
+      waitUntil: 'networkidle0',
+    });
+
+    await page.close();
+  } catch (error) {
+    console.error('Error during login:', error);
+    return false;
+  }
+};
+
 ipcMain.on('get-users', async (event) => {
   try {
     const users = await getAllUsersCookies(); // Wait for the promise to resolve
-    console.log('users', users); // Logs the resolved users array
+
     event.sender.send('users-data', users); // Send the resolved data back to the renderer
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -203,6 +239,12 @@ ipcMain.on('get-users', async (event) => {
 ipcMain.on('login-event', (event, data) => {
   // console.log('cehckdata', data);
   performLogin(data.email, data.password);
+});
+ipcMain.on('login-user', async (event, data) => {
+  console.log('cehckdata', data);
+  const cookies = await getUserCookiesByEmail(data.email);
+  console.log('cehckcookies', cookies);
+  performReLogin(cookies);
 });
 
 if (process.env.NODE_ENV === 'production') {
