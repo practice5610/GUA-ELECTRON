@@ -38,7 +38,22 @@ const ensureCookiesDir = async () => {
 // Save cookies for a user
 const saveUserCookies = async (email: string, cookies: any[]) => {
   try {
-    await ensureCookiesDir();
+    await ensureCookiesDir(); // Ensure the cookies directory exists
+
+    const filePath = path.join(COOKIES_DIR, `${email}.json`);
+
+    // Check if the file exists
+    try {
+      await fs.access(filePath); // If the file exists, no error will be thrown
+      await fs.unlink(filePath); // Delete the existing file
+      console.log(`Previous cookie file deleted for user: ${email}`);
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        // If the error is not "file not found," rethrow it
+        throw err;
+      }
+      console.log(`No existing cookie file found for user: ${email}`);
+    }
 
     // List of cookie names to exclude
     const excludedCookieNames = [
@@ -57,13 +72,15 @@ const saveUserCookies = async (email: string, cookies: any[]) => {
     const filteredCookies = cookies.filter(
       (cookie) => !excludedCookieNames.includes(cookie.name),
     );
-    console.log('cehckfiltered', filteredCookies);
-    if (filteredCookies.length > 0) {
-      const filePath = path.join(COOKIES_DIR, `${email}.json`);
+    console.log('Filtered Cookies:', filteredCookies);
 
+    if (filteredCookies.length > 0) {
+      // Write the new cookie file
       await fs.writeFile(filePath, JSON.stringify(filteredCookies, null, 2));
+      console.log(`Cookies saved for user: ${email}`);
+    } else {
+      console.log('No cookies to save after filtering.');
     }
-    console.log(`Cookies saved for user: ${email}`);
   } catch (error) {
     console.error('Error saving user cookies:', error.message);
   }
@@ -119,26 +136,77 @@ const getUserCookiesByEmail = async (email: string) => {
 // };
 const performLogin = async (email: string, password: string) => {
   try {
-    const { page } = await connect({
+    const connectWithProxy = async () => {
+      const proxies = [
+        {
+          host: '103.171.51.37',
+          port: 59100,
+          username: 'practice56101',
+          password: 'Bk4SsGh9ZV',
+        },
+        {
+          host: '45.112.173.159',
+          port: 59100,
+          username: 'practice56101',
+          password: 'Bk4SsGh9ZV',
+        },
+      ];
+
+      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
+
+      return await connect({
+        headless: false,
+        fingerprint: true,
+        proxy: {
+          host: randomProxy.host,
+          port: randomProxy.port,
+          username: randomProxy.username,
+          password: randomProxy.password,
+        },
+        ignoreHTTPSErrors: true,
+        defaultViewport: null,
+        args: ['--no-sandbox'],
+      });
+    };
+
+    // Initial connection attempt
+    let { page } = await connect({
       headless: false,
       fingerprint: true,
       ignoreHTTPSErrors: true,
       defaultViewport: null,
       args: ['--no-sandbox'],
     });
+
     page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
 
-    await page.waitForNavigation({
-      waitUntil: 'networkidle0',
-    });
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+
+    // Check for rate-limiting error
+    const rateLimitError = await page.$('#cf-error-details');
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
+
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
 
     await sleep(3000);
-    console.log('loadeddd-----');
-    // Ensure the element is available (increase timeout if necessary)
+    console.log('Page loaded...');
+
+    // Proceed with login process
     await page.waitForSelector(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
-      { timeout: 60000 }, // Increase timeout
+      { timeout: 60000 },
     );
 
     console.log('Username field is visible');
@@ -168,31 +236,64 @@ const performLogin = async (email: string, password: string) => {
     );
 
     // Wait for either navigation or an error message
-    await page.waitForNavigation({
-      waitUntil: 'networkidle0',
-    });
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
     await sleep(8000);
+
     const currentUrl = page.url();
-    console.log(`urll: ${currentUrl}`);
+    console.log(`URL: ${currentUrl}`);
     if (currentUrl === 'https://portal.ustraveldocs.com/applicanthome') {
-      console.log('user logged in succcessfully');
+      console.log('User logged in successfully');
       const cookies = await page.cookies();
       await saveUserCookies(email, cookies);
+      await page.close();
       return true;
     } else {
       return false;
     }
-
-    // await page.close();
   } catch (error) {
     console.error('Error during login:', error);
-
     return false;
   }
 };
+
 const performReLogin = async (cookies: CookieParam[]) => {
   try {
-    const { page } = await connect({
+    const connectWithProxy = async () => {
+      const proxies = [
+        {
+          host: '103.171.51.37',
+          port: 59100,
+          username: 'practice56101',
+          password: 'Bk4SsGh9ZV',
+        },
+        {
+          host: '45.112.173.159',
+          port: 59100,
+          username: 'practice56101',
+          password: 'Bk4SsGh9ZV',
+        },
+      ];
+
+      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
+
+      return await connect({
+        headless: false,
+        fingerprint: true,
+        proxy: {
+          host: randomProxy.host,
+          port: randomProxy.port,
+          username: randomProxy.username,
+          password: randomProxy.password,
+        },
+        ignoreHTTPSErrors: true,
+        defaultViewport: null,
+        args: ['--no-sandbox'],
+      });
+    };
+
+    // Initial connection attempt
+    let { page } = await connect({
       headless: false,
       fingerprint: true,
       ignoreHTTPSErrors: true,
@@ -202,26 +303,41 @@ const performReLogin = async (cookies: CookieParam[]) => {
 
     page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    await page.waitForNavigation({
-      waitUntil: 'networkidle0',
-    });
+    // Check for rate-limiting error
+    const rateLimitError = await page.$('#cf-error-details');
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
 
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
+
+    // Now set cookies regardless of rate limiting detection
     await sleep(3000);
-    console.log('loadeddd-----cookies');
+    console.log('Setting cookies...');
 
     // Spread the cookies array
     await page.setCookie(...cookies);
     await page.goto('https://portal.ustraveldocs.com/applicanthome');
-
     await page.waitForNavigation({
       waitUntil: 'networkidle0',
     });
 
-    await page.close();
+    console.log('Login process completed successfully.');
+    // await page.close();
+    return true; // Indicate success
   } catch (error) {
     console.error('Error during login:', error);
-    return false;
+    return false; // Indicate failure
   }
 };
 
