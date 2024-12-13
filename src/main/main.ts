@@ -340,6 +340,156 @@ const performReLogin = async (cookies: CookieParam[]) => {
     return false; // Indicate failure
   }
 };
+const handleCloudflare = async (page) => {
+  const blocked = await page.$('.cf-error-overview');
+  if (blocked) {
+    console.error('Blocked by Cloudflare. Retrying with a different proxy...');
+    return true;
+  }
+
+  console.log('blocked', blocked);
+
+  const spinner = await page.$('#cf-spinner');
+  if (spinner) {
+    console.log('Cloudflare challenge detected. Waiting for resolution...');
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    return false;
+  }
+
+  return false;
+};
+
+const bookAppointment = async (cookies, formData) => {
+  try {
+    // Function to connect with a random proxy
+    const connectWithProxy = async () => {
+      const proxies = [
+        {
+          host: '103.171.51.37',
+          port: 59100,
+          username: 'practice56101',
+          password: 'Bk4SsGh9ZV',
+        },
+        {
+          host: '45.112.173.159',
+          port: 59100,
+          username: 'practice56101',
+          password: 'Bk4SsGh9ZV',
+        },
+      ];
+
+      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
+
+      return await connect({
+        headless: false,
+        fingerprint: true,
+        proxy: {
+          host: randomProxy.host,
+          port: randomProxy.port,
+          username: randomProxy.username,
+          password: randomProxy.password,
+        },
+        ignoreHTTPSErrors: true,
+        defaultViewport: null,
+        args: ['--no-sandbox'],
+      });
+    };
+
+    // Initial connection attempt
+    let { page } = await connect({
+      headless: false,
+      fingerprint: true,
+      ignoreHTTPSErrors: true,
+      defaultViewport: null,
+      args: ['--no-sandbox'],
+    });
+
+    page.setDefaultTimeout(120000);
+    await page.goto('https://portal.ustraveldocs.com');
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+
+    const blocked = await page.$('.cf-error-details');
+    if (blocked) {
+      console.error(
+        'Blocked by Cloudflare. Retrying with a different proxy...',
+      );
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    }
+
+    // Check for rate-limiting error
+    const rateLimitError = await page.$('#cf-error-details');
+
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
+
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
+
+    // Set cookies and navigate to user home
+    console.log('Setting cookies...');
+    await page.setCookie(...cookies);
+    await page.goto('https://portal.ustraveldocs.com/applicanthome');
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+
+    // Check sidebar and proceed
+    console.log('Checking for sidebar...');
+    const sidebar = await page.$('#sidebar');
+    if (sidebar) {
+      console.log(
+        'Sidebar found. Navigating to "New Application / Schedule Appointment"...',
+      );
+      await page.click(
+        'a[onclick*="j_id0:SiteTemplate:j_id52:j_id53:j_id54:j_id61"]',
+      );
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+
+      console.log('Navigating to the Visa Type page...');
+      if (page.url().includes('selectvisatype')) {
+        console.log('Visa Type page found. Selecting an option...');
+        const formExists = await page.$('form#j_id0\\:SiteTemplate\\:theForm');
+        if (formExists) {
+          console.log('Form found. Filling in form data...');
+
+          // Select the radio button dynamically based on `formData.visaType`
+          await page.evaluate((visaType) => {
+            const radioButton = document.querySelector(
+              `input[name="j_id0:SiteTemplate:theForm:ttip"][value="${visaType}"]`,
+            );
+            if (radioButton) radioButton.click();
+          }, formData.visaType);
+
+          console.log(`Selected radio button with value: ${formData.visaType}`);
+
+          // Submit the form
+          await page.click('input[name="j_id0:SiteTemplate:theForm:j_id176"]');
+          console.log('Form submission successful.');
+        } else {
+          console.error('Form not found.');
+        }
+      } else {
+        console.error('Failed to navigate to the Visa Type page.');
+      }
+    } else {
+      console.error('Sidebar not found. User may not be logged in.');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error during booking:', error);
+    return false;
+  }
+};
 
 ipcMain.on('get-users', async (event) => {
   try {
@@ -361,6 +511,20 @@ ipcMain.on('login-user', async (event, data) => {
   const cookies = await getUserCookiesByEmail(data.email);
   console.log('cehckcookies', cookies);
   performReLogin(cookies);
+});
+ipcMain.on('book-appoint', async (event, data) => {
+  console.log('Received data:', data);
+
+  try {
+    // Fetch cookies using the provided email
+    const cookies = await getUserCookiesByEmail(data.email);
+    console.log('Cookies retrieved:', cookies);
+
+    // Call the booking function with the cookies and form data
+    await bookAppointment(cookies, data.formData);
+  } catch (error) {
+    console.error('Error in booking process:', error);
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {
