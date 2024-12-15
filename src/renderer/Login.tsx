@@ -65,7 +65,9 @@ function Login() {
             className="group"
             controlId="validationCustom01"
           >
-            <Form.Label className="label">Email</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Email
+            </Form.Label>
             <Form.Control
               required
               type="email"
@@ -84,7 +86,9 @@ function Login() {
             className="group"
             controlId="validationCustom02"
           >
-            <Form.Label className="label">Password</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Password
+            </Form.Label>
             <Form.Control
               required
               type="password"

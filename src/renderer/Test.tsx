@@ -92,7 +92,9 @@ function FormE() {
             className="group"
             controlId="validationCustom01"
           >
-            <Form.Label className="label">Email</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Email
+            </Form.Label>
             <Form.Control
               required
               type="text"
@@ -109,7 +111,9 @@ function FormE() {
             className="group"
             controlId="validationCustom02"
           >
-            <Form.Label className="label">Password</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Password
+            </Form.Label>
             <Form.Control
               required
               type="password"
@@ -129,7 +133,9 @@ function FormE() {
             className="group"
             controlId="validationCustom03"
           >
-            <Form.Label className="label">Select User Type</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Select User Type
+            </Form.Label>
             <Form.Select
               aria-label="Default select example"
               name="userType"
@@ -151,7 +157,9 @@ function FormE() {
             className="group"
             controlId="validationCustom03"
           >
-            <Form.Label className="label">Select Visa Category</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Select Visa Category
+            </Form.Label>
             <Form.Select
               aria-label="Default select example"
               name="visaCategory"
@@ -174,7 +182,9 @@ function FormE() {
             className="group"
             controlId="validationCustom03"
           >
-            <Form.Label className="label">Select Visa Center</Form.Label>
+            <Form.Label className="label" style={{ color: '#fff' }}>
+              Select Visa Center
+            </Form.Label>
             <Form.Select
               aria-label="Default select example"
               name="visaCenter"
