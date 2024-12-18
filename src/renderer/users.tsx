@@ -9,6 +9,8 @@ function Users() {
   const [formData, setFormData] = useState({
     userType: '',
     deliveryAddress: '',
+    centre: '',
+    category: '',
   });
   console.log(formData);
   useEffect(() => {
@@ -39,6 +41,8 @@ function Users() {
     setFormData({
       userType: '',
       deliveryAddress: '',
+      centre: '',
+      category: '',
     });
     setShowModal(false);
   };
@@ -149,6 +153,73 @@ function Users() {
                 <option value="">-Select User Type-</option>
                 <option value="immigrant">Immigrant</option>
                 <option value="nonImmigrant">Nonimmigrant</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group
+              as={Col}
+              xs="12"
+              style={{ width: '100%' }}
+              className="group"
+              controlId="validationCustom03"
+            >
+              <Form.Label className="label" style={{ color: '#000' }}>
+                Select Centre
+              </Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                name="centre"
+                value={formData.centre}
+                onChange={handleInputChange}
+                className="inputs"
+              >
+                <option value="">-Select Centre-</option>
+                <option value="islamabad">ISLAMABAD</option>
+                <option value="karachi">KARACHI</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group
+              as={Col}
+              xs="12"
+              style={{ width: '100%' }}
+              className="group"
+              controlId="validationCustom03"
+            >
+              <Form.Label className="label" style={{ color: '#000' }}>
+                Select Category
+              </Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                className="inputs"
+              >
+                <option value="">-Select Category-</option>
+
+                {formData.userType === 'nonImmigrant' && (
+                  <>
+                    <option value="sev">Students and Exchange Visitors</option>
+                    <option value="btv">Business & Tourism Visitors</option>
+                    <option value="wpb">
+                      {' '}
+                      Work, Petition Based & All Others
+                    </option>
+                    <option value="gsep">
+                      {' '}
+                      U.S. Government Sponsored Exchange Program
+                    </option>
+                    {formData.centre === 'islamabad' && (
+                      <option value="jm"> Journalist and Media</option>
+                    )}
+                  </>
+                )}
+                {formData.userType === 'immigrant' && (
+                  <>
+                    <option value="sb1">SB1</option>
+                    <option value="lpr">LPR</option>
+                  </>
+                )}
               </Form.Select>
             </Form.Group>
 

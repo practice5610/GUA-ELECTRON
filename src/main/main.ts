@@ -358,6 +358,31 @@ const handleCloudflare = async (page) => {
 
   return false;
 };
+const handleDialog = async (page) => {
+  try {
+    // Wait for the dialog to appear using a more reliable selector
+    const dialogSelector =
+      '.ui-dialog-title#ui-dialog-title-Nonimmigrant_0_Visa'; // Select the title with its ID
+    await page.waitForSelector(dialogSelector, { timeout: 5000 });
+
+    // Log that the dialog was found
+    console.log('Disclaimer dialog found.');
+
+    // Select the "Ok" button within the dialog
+    const okButtonSelector =
+      '.ui-dialog-buttonpane button:has(span.ui-button-text:contains("Ok"))'; // Adjust selector for the Ok button
+    const okButton = await page.$(okButtonSelector);
+
+    if (okButton) {
+      await okButton.click();
+      console.log('Clicked "Ok" button in the dialog.');
+    } else {
+      console.error('Ok button not found in the dialog.');
+    }
+  } catch (err) {
+    console.log('No dialog found, continuing...', err);
+  }
+};
 
 const bookAppointment = async (cookies, formData) => {
   try {
@@ -409,7 +434,10 @@ const bookAppointment = async (cookies, formData) => {
     await page.goto('https://portal.ustraveldocs.com');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    const blocked = await page.$('.cf-error-details');
+    const blocked = await page
+      .waitForSelector('#cf-error-details', { timeout: 5000 })
+      .catch(() => null);
+    console.log('blocked', blocked);
     if (blocked) {
       console.error(
         'Blocked by Cloudflare. Retrying with a different proxy...',
@@ -439,12 +467,15 @@ const bookAppointment = async (cookies, formData) => {
     // Set cookies and navigate to user home
     console.log('Setting cookies...');
     await page.setCookie(...cookies);
-    await page.goto('https://portal.ustraveldocs.com/applicanthome');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-
+    await page.goto('https://portal.ustraveldocs.com/applicanthome', {
+      waitUntil: 'networkidle2',
+    });
+    console.log('network kindle finished');
     // Check sidebar and proceed
     console.log('Checking for sidebar...');
-    const sidebar = await page.$('#sidebar');
+    const sidebar = await page
+      .waitForSelector('#sidebar', { timeout: 5000 })
+      .catch(() => null);
     if (sidebar) {
       console.log(
         'Sidebar found. Navigating to "New Application / Schedule Appointment"...',
@@ -455,34 +486,257 @@ const bookAppointment = async (cookies, formData) => {
       await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
       console.log('Navigating to the Visa Type page...');
-      if (page.url().includes('selectvisatype')) {
-        console.log('Visa Type page found. Selecting an option...');
-        const formExists = await page.$('form#j_id0\\:SiteTemplate\\:theForm');
-        if (formExists) {
-          console.log('Form found. Filling in form data...');
-
-          // Select the radio button dynamically based on `formData.visaType`
-          await page.evaluate((visaType) => {
-            const radioButton = document.querySelector(
-              `input[name="j_id0:SiteTemplate:theForm:ttip"][value="${visaType}"]`,
-            );
-            if (radioButton) radioButton.click();
-          }, formData.visaType);
-
-          console.log(`Selected radio button with value: ${formData.visaType}`);
-
-          // Submit the form
-          await page.click('input[name="j_id0:SiteTemplate:theForm:j_id176"]');
-          console.log('Form submission successful.');
-        } else {
-          console.error('Form not found.');
-        }
-      } else {
-        console.error('Failed to navigate to the Visa Type page.');
-      }
     } else {
       console.error('Sidebar not found. User may not be logged in.');
     }
+    if (page.url().includes('selectvisatype')) {
+      // Continue with the rest of the logic
+      const formExists = await page.$('form#j_id0\\:SiteTemplate\\:theForm');
+      if (formExists) {
+        console.log('Form found. Filling in form data...', formData);
+
+        // Ensure formData is defined and contains visaType
+        if (!formData || !formData.userType) {
+          console.error('Error: formData or visaType is undefined.');
+          return;
+        }
+
+        try {
+          // Select the radio button dynamically based on formData.visaType
+          if (formData.userType === 'immigrant') {
+            await page.evaluate(() => {
+              const radioButton = document.getElementById(
+                'j_id0:SiteTemplate:theForm:ttip:1',
+              );
+              if (radioButton) {
+                radioButton.click();
+                console.log('Immigrant Visa radio button selected.');
+              } else {
+                console.error('Immigrant Visa radio button not found.');
+              }
+            });
+          } else if (formData.userType === 'nonImmigrant') {
+            await page.waitForSelector('.ui-dialog', { timeout: 5000 });
+
+            // Log that the dialog was found
+
+            await page.evaluate(() => {
+              const radioButton = document.getElementById(
+                'j_id0:SiteTemplate:theForm:ttip:2',
+              );
+              if (radioButton) {
+                radioButton.click();
+                console.log('Nonimmigrant Visa radio button selected.');
+              } else {
+                console.error('Nonimmigrant Visa radio button not found.');
+              }
+            });
+          } else {
+            console.error(`Invalid visaType provided: ${formData.userType}`);
+          }
+
+          // Submit the form
+          await page.click('input[name="j_id0:SiteTemplate:theForm:j_id176"]');
+          await page.waitForNavigation({ waitUntil: 'networkidle0' });
+          console.log('Form submission successful.');
+        } catch (error) {
+          console.error(`Error during form handling: ${error.message}`);
+        }
+      } else {
+        console.error('Form not found.');
+      }
+    } else {
+      console.error('Failed to navigate to the Visa Type page.');
+    }
+
+    if (page.url().includes('selectpost')) {
+      await page.waitForSelector('form#j_id0\\:SiteTemplate\\:j_id112'); // Escape colons in IDs with \\
+
+      // Select the desired radio button (e.g., ISLAMABAD IV)
+      if (formData.centre === 'islamabad') {
+        await page.click('input#j_id0\\:SiteTemplate\\:j_id112\\:j_id165\\:0');
+        console.log('Selected: ISLAMABAD IV');
+      } else if (formData.centre === 'karachi') {
+        await page.click('input#j_id0\\:SiteTemplate\\:j_id112\\:j_id165\\:1');
+        console.log('Selected: KARACHI');
+      } else {
+        console.error('Invalid post selected.');
+
+        return;
+      }
+
+      // Click the "Continue" button
+      await page.click('input[name="j_id0:SiteTemplate:j_id112:j_id169"]');
+      console.log('Clicked "Continue" button.');
+
+      // Wait for the next page to load (if applicable)
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      console.log('Form submitted and navigated to the next page.');
+    } else {
+      console.error('Failed to navigate to the select post page.');
+    }
+
+    if (page.url().includes('selectvisacategory')) {
+      console.log(
+        'Visa Category page found. Selecting the appropriate category...',
+      );
+
+      // Select the appropriate category based on formData.category
+      if (formData.category === 'sb1') {
+        // SB1 selection (keeping your existing logic)
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes(
+                'SB1, Determining Returning Resident Status',
+              ),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: SB1, Determining Returning Resident Status');
+      } else if (formData.category === 'lpr') {
+        // LPR selection (keeping your existing logic)
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes(
+                'LPR - Boarding Foil for lost/stolen/expired Green Cards',
+              ),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log(
+          'Selected: LPR - Boarding Foil for lost/stolen/expired Green Cards',
+        );
+      } else if (formData.category === 'sev') {
+        // Students and Exchange Visitors
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes('Students and Exchange Visitors'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Students and Exchange Visitors');
+      } else if (formData.category === 'btv') {
+        // Business & Tourism Visitors
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes('Business & Tourism Visitors'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Business & Tourism Visitors');
+      } else if (formData.category === 'wpb') {
+        // Work, Petition Based & All Others
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes('Work, Petition Based & All Others'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Work, Petition Based & All Others');
+      } else if (formData.category === 'gsep') {
+        // U.S. Government Sponsored Exchange Program
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes(
+                'U.S. Government Sponsored Exchange Program',
+              ),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: U.S. Government Sponsored Exchange Program');
+      } else if (formData.category === 'jm') {
+        // Journalist and Media
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) => label.textContent.includes('Journalist and Media'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Journalist and Media');
+      } else {
+        console.error(`Invalid category provided: ${formData.category}`);
+        return;
+      }
+
+      // Wait for the "Continue" button to appear
+      const continueBtn = await page.waitForSelector(
+        'input[name="j_id0:SiteTemplate:j_id166"], input[name="j_id0:SiteTemplate:j_id109:j_id166"]',
+      );
+
+      // Check if the button is enabled before clicking
+      const isButtonEnabled = async (selector) => {
+        const button = await page.$(selector);
+        if (button) {
+          const isDisabled = await button.evaluate((el) => el.disabled);
+          return !isDisabled; // Return true if the button is enabled
+        }
+        return false; // Return false if the button does not exist
+      };
+
+      // Click the enabled button
+      if (await isButtonEnabled('input[name="j_id0:SiteTemplate:j_id166"]')) {
+        await page.click('input[name="j_id0:SiteTemplate:j_id166"]');
+        console.log('Clicked immigrant visa category "Continue" button.');
+      } else if (
+        await isButtonEnabled(
+          'input[name="j_id0:SiteTemplate:j_id109:j_id166"]',
+        )
+      ) {
+        await page.click('input[name="j_id0:SiteTemplate:j_id109:j_id166"]');
+        console.log('Clicked non-immigrant visa category "Continue" button.');
+      } else {
+        console.error('No available "Continue" button to click.');
+      }
+
+      console.log('Clicked "Continue" button.');
+
+      // Wait for the next page to load (if applicable)
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      console.log('Navigated to the next page after selecting the category.');
+    } else {
+      console.error('Failed to navigate to the Visa category page.');
+    }
+
+    if (page.url().includes('selectvisacode')) {
+      await page.waitForSelector('#j_id0\\:SiteTemplate\\:theForm');
+
+      // Check the selected visa category and select the appropriate radio button
+      if (formData.category === 'sb1') {
+        await page.click('input[type="radio"][value="a0AC000000JRE67MAH"]');
+      } else if (formData.category === 'lpr') {
+        await page.click('input[type="radio"][value="a0A1A00001vmWztUAE"]');
+      }
+
+      // Click the "Continue" button
+      await page.click('input[name="j_id0:SiteTemplate:theForm:j_id178"]');
+    } else {
+      console.error('Failed to navigate to the Visa category page.');
+    }
+    // Wait for the tooltip to appear
+    await page.waitForSelector('#ui-tooltip-4');
+
+    // Click the "I Accept Terms And Conditions" button
+    await page.click('#AcceptButton');
 
     return true;
   } catch (error) {
