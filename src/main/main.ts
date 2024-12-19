@@ -340,49 +340,6 @@ const performReLogin = async (cookies: CookieParam[]) => {
     return false; // Indicate failure
   }
 };
-const handleCloudflare = async (page) => {
-  const blocked = await page.$('.cf-error-overview');
-  if (blocked) {
-    console.error('Blocked by Cloudflare. Retrying with a different proxy...');
-    return true;
-  }
-
-  console.log('blocked', blocked);
-
-  const spinner = await page.$('#cf-spinner');
-  if (spinner) {
-    console.log('Cloudflare challenge detected. Waiting for resolution...');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    return false;
-  }
-
-  return false;
-};
-const handleDialog = async (page) => {
-  try {
-    // Wait for the dialog to appear using a more reliable selector
-    const dialogSelector =
-      '.ui-dialog-title#ui-dialog-title-Nonimmigrant_0_Visa'; // Select the title with its ID
-    await page.waitForSelector(dialogSelector, { timeout: 5000 });
-
-    // Log that the dialog was found
-    console.log('Disclaimer dialog found.');
-
-    // Select the "Ok" button within the dialog
-    const okButtonSelector =
-      '.ui-dialog-buttonpane button:has(span.ui-button-text:contains("Ok"))'; // Adjust selector for the Ok button
-    const okButton = await page.$(okButtonSelector);
-
-    if (okButton) {
-      await okButton.click();
-      console.log('Clicked "Ok" button in the dialog.');
-    } else {
-      console.error('Ok button not found in the dialog.');
-    }
-  } catch (err) {
-    console.log('No dialog found, continuing...', err);
-  }
-};
 
 const bookAppointment = async (cookies, formData) => {
   try {
@@ -442,13 +399,16 @@ const bookAppointment = async (cookies, formData) => {
       console.error(
         'Blocked by Cloudflare. Retrying with a different proxy...',
       );
+      await page.close();
       ({ page } = await connectWithProxy());
       await page.goto('https://portal.ustraveldocs.com');
       await page.waitForNavigation({ waitUntil: 'networkidle0' });
     }
 
     // Check for rate-limiting error
-    const rateLimitError = await page.$('#cf-error-details');
+    const rateLimitError = await page
+      .waitForSelector('#cf-error-details', { timeout: 3000 })
+      .catch(() => null);
 
     if (rateLimitError) {
       console.error('Rate limiting detected, retrying with a proxy...');
@@ -471,6 +431,20 @@ const bookAppointment = async (cookies, formData) => {
       waitUntil: 'networkidle2',
     });
     console.log('network kindle finished');
+
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
+
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com/applicanthome');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
     // Check sidebar and proceed
     console.log('Checking for sidebar...');
     const sidebar = await page
@@ -490,53 +464,44 @@ const bookAppointment = async (cookies, formData) => {
       console.error('Sidebar not found. User may not be logged in.');
     }
     if (page.url().includes('selectvisatype')) {
-      // Continue with the rest of the logic
+      // Check if the form exists
       const formExists = await page.$('form#j_id0\\:SiteTemplate\\:theForm');
       if (formExists) {
-        console.log('Form found. Filling in form data...', formData);
-
-        // Ensure formData is defined and contains visaType
-        if (!formData || !formData.userType) {
-          console.error('Error: formData or visaType is undefined.');
-          return;
-        }
+        console.log('Form found. Filling in form data...');
 
         try {
-          // Select the radio button dynamically based on formData.visaType
-          if (formData.userType === 'immigrant') {
-            await page.evaluate(() => {
-              const radioButton = document.getElementById(
-                'j_id0:SiteTemplate:theForm:ttip:1',
-              );
-              if (radioButton) {
-                radioButton.click();
-                console.log('Immigrant Visa radio button selected.');
-              } else {
-                console.error('Immigrant Visa radio button not found.');
-              }
-            });
-          } else if (formData.userType === 'nonImmigrant') {
-            await page.waitForSelector('.ui-dialog', { timeout: 5000 });
+          // Select the appropriate radio button
+          const visaType = formData.userType; // 'immigrant' or 'nonImmigrant'
 
-            // Log that the dialog was found
+          if (visaType === 'immigrant') {
+            console.log('Selecting Immigrant Visa...');
+            await page.click('#j_id0\\:SiteTemplate\\:theForm\\:ttip\\:1');
+            console.log('Immigrant Visa selected.');
+          } else if (visaType === 'nonImmigrant') {
+            console.log('Selecting Nonimmigrant Visa...');
+            await page.click('#j_id0\\:SiteTemplate\\:theForm\\:ttip\\:2');
 
-            await page.evaluate(() => {
-              const radioButton = document.getElementById(
-                'j_id0:SiteTemplate:theForm:ttip:2',
-              );
-              if (radioButton) {
-                radioButton.click();
-                console.log('Nonimmigrant Visa radio button selected.');
-              } else {
-                console.error('Nonimmigrant Visa radio button not found.');
-              }
-            });
+            // Handle the disclaimer dialog
+            const dialog = await page
+              .waitForSelector('.ui-dialog', { timeout: 3000 })
+              .catch(() => null);
+            if (dialog) {
+              console.log('Disclaimer found. Clicking OK button...');
+              await page.click('.ui-dialog .ui-button');
+              console.log('OK button clicked.');
+            } else {
+              console.log('Disclaimer not found.');
+            }
           } else {
-            console.error(`Invalid visaType provided: ${formData.userType}`);
+            console.error(`Invalid userType provided: ${visaType}`);
+            return;
           }
 
-          // Submit the form
+          // Click the Continue button
+          console.log('Clicking Continue...');
           await page.click('input[name="j_id0:SiteTemplate:theForm:j_id176"]');
+
+          // Wait for navigation to complete
           await page.waitForNavigation({ waitUntil: 'networkidle0' });
           console.log('Form submission successful.');
         } catch (error) {
@@ -725,18 +690,37 @@ const bookAppointment = async (cookies, formData) => {
         await page.click('input[type="radio"][value="a0AC000000JRE67MAH"]');
       } else if (formData.category === 'lpr') {
         await page.click('input[type="radio"][value="a0A1A00001vmWztUAE"]');
+      } else if (formData.category === 'btv') {
+        await page.click('input[type="radio"][value="a0AC000000ILpJwMAL"]');
       }
-
       // Click the "Continue" button
       await page.click('input[name="j_id0:SiteTemplate:theForm:j_id178"]');
     } else {
       console.error('Failed to navigate to the Visa category page.');
     }
     // Wait for the tooltip to appear
-    await page.waitForSelector('#ui-tooltip-4');
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
 
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com/updatedata');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
+    const dis = await page
+      .waitForSelector('.ui-tooltip', { timeout: 3000 })
+      .catch(() => null);
+    if (dis) {
+      console.log('found dis');
+    }
+    await page.waitForSelector('.ui-tooltip .generatebutton');
     // Click the "I Accept Terms And Conditions" button
-    await page.click('#AcceptButton');
+    await page.click('.ui-tooltip .generatebutton');
 
     return true;
   } catch (error) {

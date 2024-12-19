@@ -198,21 +198,7 @@ function Users() {
                 <option value="">-Select Category-</option>
 
                 {formData.userType === 'nonImmigrant' && (
-                  <>
-                    <option value="sev">Students and Exchange Visitors</option>
-                    <option value="btv">Business & Tourism Visitors</option>
-                    <option value="wpb">
-                      {' '}
-                      Work, Petition Based & All Others
-                    </option>
-                    <option value="gsep">
-                      {' '}
-                      U.S. Government Sponsored Exchange Program
-                    </option>
-                    {formData.centre === 'islamabad' && (
-                      <option value="jm"> Journalist and Media</option>
-                    )}
-                  </>
+                  <option value="btv">Business & Tourism Visitors</option>
                 )}
                 {formData.userType === 'immigrant' && (
                   <>
