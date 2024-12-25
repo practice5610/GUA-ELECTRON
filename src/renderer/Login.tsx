@@ -26,9 +26,9 @@ function Login() {
 
     // Simulate login logic
     if (
-      formData.email === 'admin123@gmail.com' &&
+      formData.email === 'usdoc@gmail.com' &&
       formData.password === 'usAppointment!' &&
-      new Date() < new Date('2024-12-20')
+      new Date() < new Date('2024-12-27')
     ) {
       setIsLoading(false);
       toast.success('Login successful');
