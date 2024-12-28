@@ -139,16 +139,10 @@ const performLogin = async (email: string, password: string) => {
     const connectWithProxy = async () => {
       const proxies = [
         {
-          host: '103.171.51.37',
-          port: 59100,
-          username: 'practice56101',
-          password: 'Bk4SsGh9ZV',
-        },
-        {
-          host: '45.112.173.159',
-          port: 59100,
-          username: 'practice56101',
-          password: 'Bk4SsGh9ZV',
+          host: 'fast.froxy.com',
+          port: 10000,
+          username: 'xs0swnfhbn3lfbwmdt6ghxg',
+          password: 'RNW78Fm5',
         },
       ];
 
@@ -261,16 +255,10 @@ const performReLogin = async (cookies: CookieParam[]) => {
     const connectWithProxy = async () => {
       const proxies = [
         {
-          host: '103.171.51.37',
-          port: 59100,
-          username: 'practice56101',
-          password: 'Bk4SsGh9ZV',
-        },
-        {
-          host: '45.112.173.159',
-          port: 59100,
-          username: 'practice56101',
-          password: 'Bk4SsGh9ZV',
+          host: 'fast.froxy.com',
+          port: 10000,
+          username: 'xs0swnfhbn3lfbwmdt6ghxg',
+          password: 'RNW78Fm5',
         },
       ];
 
@@ -296,6 +284,12 @@ const performReLogin = async (cookies: CookieParam[]) => {
     let { page } = await connect({
       headless: false,
       fingerprint: true,
+      proxy: {
+        host: 'fast.froxy.com',
+        port: 10000,
+        username: 'xs0swnfhbn3lfbwmdt6ghxg',
+        password: 'RNW78Fm5',
+      },
       ignoreHTTPSErrors: true,
       defaultViewport: null,
       args: ['--no-sandbox'],
@@ -347,16 +341,10 @@ const bookAppointment = async (cookies, formData) => {
     const connectWithProxy = async () => {
       const proxies = [
         {
-          host: '103.171.51.37',
-          port: 59100,
-          username: 'practice56101',
-          password: 'Bk4SsGh9ZV',
-        },
-        {
-          host: '45.112.173.159',
-          port: 59100,
-          username: 'practice56101',
-          password: 'Bk4SsGh9ZV',
+          host: 'fast.froxy.com',
+          port: 10000,
+          username: 'xs0swnfhbn3lfbwmdt6ghxg',
+          password: 'RNW78Fm5',
         },
       ];
 
@@ -382,6 +370,12 @@ const bookAppointment = async (cookies, formData) => {
     let { page } = await connect({
       headless: false,
       fingerprint: true,
+      proxy: {
+        host: 'fast.froxy.com',
+        port: 10000,
+        username: 'xs0swnfhbn3lfbwmdt6ghxg',
+        password: 'RNW78Fm5',
+      },
       ignoreHTTPSErrors: true,
       defaultViewport: null,
       args: ['--no-sandbox'],
@@ -728,6 +722,393 @@ const bookAppointment = async (cookies, formData) => {
     return false;
   }
 };
+const bookAppointment2 = async (cookies, formData) => {
+  try {
+    // Function to connect with a random proxy
+    const connectWithProxy = async () => {
+      const proxies = [
+        {
+          host: 'fast.froxy.com',
+          port: 10000,
+          username: 'xs0swnfhbn3lfbwmdt6ghxg',
+          password: 'RNW78Fm5',
+        },
+      ];
+
+      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
+
+      return await connect({
+        headless: false,
+        fingerprint: true,
+        proxy: {
+          host: randomProxy.host,
+          port: randomProxy.port,
+          username: randomProxy.username,
+          password: randomProxy.password,
+        },
+        ignoreHTTPSErrors: true,
+        defaultViewport: null,
+        args: ['--no-sandbox'],
+      });
+    };
+
+    // Initial connection attempt
+    let { page } = await connect({
+      headless: false,
+      fingerprint: true,
+      proxy: {
+        host: 'fast.froxy.com',
+        port: 10000,
+        username: 'xs0swnfhbn3lfbwmdt6ghxg',
+        password: 'RNW78Fm5',
+      },
+      ignoreHTTPSErrors: true,
+      defaultViewport: null,
+      args: ['--no-sandbox'],
+    });
+
+    page.setDefaultTimeout(120000);
+    await page.goto('https://portal.ustraveldocs.com');
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+
+    const blocked = await page
+      .waitForSelector('#cf-error-details', { timeout: 5000 })
+      .catch(() => null);
+    console.log('blocked', blocked);
+    if (blocked) {
+      console.error(
+        'Blocked by Cloudflare. Retrying with a different proxy...',
+      );
+      await page.close();
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    }
+
+    // Check for rate-limiting error
+    const rateLimitError = await page
+      .waitForSelector('#cf-error-details', { timeout: 3000 })
+      .catch(() => null);
+
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
+
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
+
+    // Set cookies and navigate to user home
+    console.log('Setting cookies...');
+    await page.setCookie(...cookies);
+    await page.goto('https://portal.ustraveldocs.com/applicanthome', {
+      waitUntil: 'networkidle2',
+    });
+    console.log('network kindle finished');
+
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
+
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com/applicanthome');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
+    // Check sidebar and proceed
+    console.log('Checking for sidebar...');
+    const sidebar = await page
+      .waitForSelector('#sidebar', { timeout: 5000 })
+      .catch(() => null);
+    if (sidebar) {
+      console.log(
+        'Sidebar found. Navigating to "New Application / Schedule Appointment"...',
+      );
+      await page.click(
+        'a[onclick*="j_id0:SiteTemplate:j_id52:j_id53:j_id54:j_id61"]',
+      );
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+
+      console.log('Navigating to the Visa Type page...');
+    } else {
+      console.error('Sidebar not found. User may not be logged in.');
+    }
+    if (page.url().includes('selectvisapriority')) {
+      // Check if the form exists
+      const formExists = await page.$('form#j_id0\\:SiteTemplate\\:theForm');
+      if (formExists) {
+        console.log('Form found. Filling in form data...');
+
+        try {
+          // Select the appropriate radio button
+          const visaType = formData.userType; // 'immigrant' or 'nonImmigrant'
+
+          if (visaType === 'immigrant') {
+            console.log('Selecting Immigrant Visa...');
+            await page.click('#j_id0\\:SiteTemplate\\:theForm\\:ttip\\:1');
+            console.log('Immigrant Visa selected.');
+          } else if (visaType === 'nonImmigrant') {
+            console.log('Selecting Nonimmigrant Visa...');
+            await page.click('#j_id0\\:SiteTemplate\\:theForm\\:ttip\\:2');
+
+            // Handle the disclaimer dialog
+            const dialog = await page
+              .waitForSelector('.ui-dialog', { timeout: 3000 })
+              .catch(() => null);
+            if (dialog) {
+              console.log('Disclaimer found. Clicking OK button...');
+              await page.click('.ui-dialog .ui-button');
+              console.log('OK button clicked.');
+            } else {
+              console.log('Disclaimer not found.');
+            }
+          } else {
+            console.error(`Invalid userType provided: ${visaType}`);
+            return;
+          }
+
+          // Click the Continue button
+          console.log('Clicking Continue...');
+          await page.click('input[name="j_id0:SiteTemplate:theForm:j_id176"]');
+
+          // Wait for navigation to complete
+          await page.waitForNavigation({ waitUntil: 'networkidle0' });
+          console.log('Form submission successful.');
+        } catch (error) {
+          console.error(`Error during form handling: ${error.message}`);
+        }
+      } else {
+        console.error('Form not found.');
+      }
+    } else {
+      console.error('Failed to navigate to the Visa Type page.');
+    }
+
+    if (page.url().includes('selectpost')) {
+      await page.waitForSelector('form#j_id0\\:SiteTemplate\\:j_id112'); // Escape colons in IDs with \\
+
+      // Select the desired radio button (e.g., ISLAMABAD IV)
+      if (formData.centre === 'islamabad') {
+        await page.click('input#j_id0\\:SiteTemplate\\:j_id112\\:j_id165\\:0');
+        console.log('Selected: ISLAMABAD IV');
+      } else if (formData.centre === 'karachi') {
+        await page.click('input#j_id0\\:SiteTemplate\\:j_id112\\:j_id165\\:1');
+        console.log('Selected: KARACHI');
+      } else {
+        console.error('Invalid post selected.');
+
+        return;
+      }
+
+      // Click the "Continue" button
+      await page.click('input[name="j_id0:SiteTemplate:j_id112:j_id169"]');
+      console.log('Clicked "Continue" button.');
+
+      // Wait for the next page to load (if applicable)
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      console.log('Form submitted and navigated to the next page.');
+    } else {
+      console.error('Failed to navigate to the select post page.');
+    }
+
+    if (page.url().includes('selectvisacategory')) {
+      console.log(
+        'Visa Category page found. Selecting the appropriate category...',
+      );
+
+      // Select the appropriate category based on formData.category
+      if (formData.category === 'sb1') {
+        // SB1 selection (keeping your existing logic)
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes(
+                'SB1, Determining Returning Resident Status',
+              ),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: SB1, Determining Returning Resident Status');
+      } else if (formData.category === 'lpr') {
+        // LPR selection (keeping your existing logic)
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes(
+                'LPR - Boarding Foil for lost/stolen/expired Green Cards',
+              ),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log(
+          'Selected: LPR - Boarding Foil for lost/stolen/expired Green Cards',
+        );
+      } else if (formData.category === 'sev') {
+        // Students and Exchange Visitors
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes('Students and Exchange Visitors'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Students and Exchange Visitors');
+      } else if (formData.category === 'btv') {
+        // Business & Tourism Visitors
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes('Business & Tourism Visitors'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Business & Tourism Visitors');
+      } else if (formData.category === 'wpb') {
+        // Work, Petition Based & All Others
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes('Work, Petition Based & All Others'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Work, Petition Based & All Others');
+      } else if (formData.category === 'gsep') {
+        // U.S. Government Sponsored Exchange Program
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) =>
+              label.textContent.includes(
+                'U.S. Government Sponsored Exchange Program',
+              ),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: U.S. Government Sponsored Exchange Program');
+      } else if (formData.category === 'jm') {
+        // Journalist and Media
+        await page.evaluate(() => {
+          const label = Array.from(document.querySelectorAll('label')).find(
+            (label) => label.textContent.includes('Journalist and Media'),
+          );
+          if (label) {
+            label.previousElementSibling.click(); // Click the radio input before the label
+          }
+        });
+        console.log('Selected: Journalist and Media');
+      } else {
+        console.error(`Invalid category provided: ${formData.category}`);
+        return;
+      }
+
+      // Wait for the "Continue" button to appear
+      const continueBtn = await page.waitForSelector(
+        'input[name="j_id0:SiteTemplate:j_id166"], input[name="j_id0:SiteTemplate:j_id109:j_id166"]',
+      );
+
+      // Check if the button is enabled before clicking
+      const isButtonEnabled = async (selector) => {
+        const button = await page.$(selector);
+        if (button) {
+          const isDisabled = await button.evaluate((el) => el.disabled);
+          return !isDisabled; // Return true if the button is enabled
+        }
+        return false; // Return false if the button does not exist
+      };
+
+      // Click the enabled button
+      if (await isButtonEnabled('input[name="j_id0:SiteTemplate:j_id166"]')) {
+        await page.click('input[name="j_id0:SiteTemplate:j_id166"]');
+        console.log('Clicked immigrant visa category "Continue" button.');
+      } else if (
+        await isButtonEnabled(
+          'input[name="j_id0:SiteTemplate:j_id109:j_id166"]',
+        )
+      ) {
+        await page.click('input[name="j_id0:SiteTemplate:j_id109:j_id166"]');
+        console.log('Clicked non-immigrant visa category "Continue" button.');
+      } else {
+        console.error('No available "Continue" button to click.');
+      }
+
+      console.log('Clicked "Continue" button.');
+
+      // Wait for the next page to load (if applicable)
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      console.log('Navigated to the next page after selecting the category.');
+    } else {
+      console.error('Failed to navigate to the Visa category page.');
+    }
+
+    if (page.url().includes('selectvisacode')) {
+      await page.waitForSelector('#j_id0\\:SiteTemplate\\:theForm');
+
+      // Check the selected visa category and select the appropriate radio button
+      if (formData.category === 'sb1') {
+        await page.click('input[type="radio"][value="a0AC000000JRE67MAH"]');
+      } else if (formData.category === 'lpr') {
+        await page.click('input[type="radio"][value="a0A1A00001vmWztUAE"]');
+      } else if (formData.category === 'btv') {
+        await page.click('input[type="radio"][value="a0AC000000ILpJwMAL"]');
+      }
+      // Click the "Continue" button
+      await page.click('input[name="j_id0:SiteTemplate:theForm:j_id178"]');
+    } else {
+      console.error('Failed to navigate to the Visa category page.');
+    }
+    // Wait for the tooltip to appear
+    if (rateLimitError) {
+      console.error('Rate limiting detected, retrying with a proxy...');
+
+      // Close the current page to clean up resources
+      await page.close();
+
+      // Retry with a proxy
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com/updatedata');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else {
+      console.log('No rate limiting detected, continuing with normal flow...');
+    }
+    const dis = await page
+      .waitForSelector('.ui-tooltip', { timeout: 3000 })
+      .catch(() => null);
+    if (dis) {
+      console.log('found dis');
+    }
+    await page.waitForSelector('.ui-tooltip .generatebutton');
+    // Click the "I Accept Terms And Conditions" button
+    await page.click('.ui-tooltip .generatebutton');
+
+    return true;
+  } catch (error) {
+    console.error('Error during booking:', error);
+    return false;
+  }
+};
 
 ipcMain.on('get-users', async (event) => {
   try {
@@ -760,6 +1141,20 @@ ipcMain.on('book-appoint', async (event, data) => {
 
     // Call the booking function with the cookies and form data
     await bookAppointment(cookies, data.formData);
+  } catch (error) {
+    console.error('Error in booking process:', error);
+  }
+});
+ipcMain.on('book-appoint2', async (event, data) => {
+  console.log('Received data:', data);
+
+  try {
+    // Fetch cookies using the provided email
+    const cookies = await getUserCookiesByEmail(data.email);
+    console.log('Cookies retrieved:', cookies);
+
+    // Call the booking function with the cookies and form data
+    await bookAppointment2(cookies, data.formData);
   } catch (error) {
     console.error('Error in booking process:', error);
   }

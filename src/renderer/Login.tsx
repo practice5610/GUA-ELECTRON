@@ -8,8 +8,8 @@ function Login() {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'usdoc@gmail.com',
+    password: 'usAppointment!',
   });
 
   const handleSubmit = (event) => {
@@ -28,7 +28,7 @@ function Login() {
     if (
       formData.email === 'usdoc@gmail.com' &&
       formData.password === 'usAppointment!' &&
-      new Date() < new Date('2024-12-27')
+      new Date() < new Date('2025-01-01')
     ) {
       setIsLoading(false);
       toast.success('Login successful');

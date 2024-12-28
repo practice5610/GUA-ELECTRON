@@ -6,11 +6,15 @@ function Users() {
   const [users, setUsers] = useState([]);
   const [Email, setEmail] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showModal2, setShowModal2] = useState(false);
   const [formData, setFormData] = useState({
     userType: '',
     deliveryAddress: '',
     centre: '',
     category: '',
+  });
+  const [formData2, setFormData2] = useState({
+    Visa_Priority: 'Regular',
   });
   console.log(formData);
   useEffect(() => {
@@ -37,6 +41,10 @@ function Users() {
     setEmail(uemail);
     setShowModal(true);
   };
+  const handleOpen2 = (uemail) => {
+    setEmail(uemail);
+    setShowModal2(true);
+  };
   const handleClose = () => {
     setFormData({
       userType: '',
@@ -46,10 +54,16 @@ function Users() {
     });
     setShowModal(false);
   };
+  const handleClose2 = () => {
+    setFormData2({
+      Visa_Priority: '',
+    });
+    setShowModal2(false);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData2((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
@@ -60,7 +74,14 @@ function Users() {
     });
     handleClose();
   };
-
+  const handleSubmit2 = () => {
+    console.log('Form Submitted:', formData);
+    window.electron.ipcRenderer.sendMessage('book-appoint2', {
+      email: Email,
+      formData2,
+    });
+    handleClose();
+  };
   return (
     <div>
       <div
@@ -110,6 +131,12 @@ function Users() {
                       onClick={() => handleOpen(user.email)}
                     >
                       Book Appointment
+                    </button>
+                    <button
+                      className="users-action-btn"
+                      onClick={() => handleOpen2(user.email)}
+                    >
+                      Continue
                     </button>
                   </div>
                 </td>
@@ -244,6 +271,61 @@ function Users() {
             Cancel
           </Button>
           <Button className="users-action-btn" onClick={handleSubmit}>
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showModal2} onHide={handleClose} className="modal">
+        <Modal.Header
+          closeButton
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Modal.Title style={{ color: '#000' }}>Book Appointment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ marginTop: '1rem' }}>
+          <Form>
+            <Form.Group
+              as={Col}
+              xs="12"
+              style={{ width: '100%' }}
+              className="group"
+              controlId="validationCustom03"
+            >
+              <Form.Label className="label" style={{ color: '#000' }}>
+                Select User Type
+              </Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                name="userType"
+                value={formData2.Visa_Priority}
+                onChange={handleInputChange}
+                className="inputs"
+              >
+                <option value="">-Select Visa Priority:-</option>
+                <option value="Regular">Regular</option>
+                <option value="Previously_Refused">Previously Refused</option>
+                <option value="Interview_Waiver">Interview Waiver</option>
+              </Form.Select>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer
+          style={{
+            marginTop: '1rem',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '10px',
+            alignItems: 'center',
+          }}
+        >
+          <Button className="users-action-btn" onClick={handleClose2}>
+            Cancel
+          </Button>
+          <Button className="users-action-btn" onClick={handleSubmit2}>
             Submit
           </Button>
         </Modal.Footer>
