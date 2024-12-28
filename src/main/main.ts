@@ -34,7 +34,30 @@ const ensureCookiesDir = async () => {
     console.error('Error ensuring cookies directory:', error);
   }
 };
+const connectWithProxy = async () => {
+  const proxies = Array.from({ length: 1000 }, (_, i) => ({
+    host: 'fast.froxy.com',
+    port: 10000 + i,
+    username: 'xs0swnfhbn3lfbwmdt6ghxg',
+    password: 'RNW78Fm5',
+  }));
 
+  const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+  console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
+
+  return connect({
+    headless: false,
+    proxy: {
+      host: randomProxy.host,
+      port: randomProxy.port,
+      username: randomProxy.username,
+      password: randomProxy.password,
+    },
+    ignoreHTTPSErrors: true,
+    defaultViewport: null,
+    args: ['--no-sandbox'],
+  });
+};
 // Save cookies for a user
 const saveUserCookies = async (email: string, cookies: any[]) => {
   try {
@@ -136,43 +159,8 @@ const getUserCookiesByEmail = async (email: string) => {
 // };
 const performLogin = async (email: string, password: string) => {
   try {
-    const connectWithProxy = async () => {
-      const proxies = [
-        {
-          host: 'fast.froxy.com',
-          port: 10000,
-          username: 'xs0swnfhbn3lfbwmdt6ghxg',
-          password: 'RNW78Fm5',
-        },
-      ];
-
-      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
-
-      return await connect({
-        headless: false,
-        fingerprint: true,
-        proxy: {
-          host: randomProxy.host,
-          port: randomProxy.port,
-          username: randomProxy.username,
-          password: randomProxy.password,
-        },
-        ignoreHTTPSErrors: true,
-        defaultViewport: null,
-        args: ['--no-sandbox'],
-      });
-    };
-
     // Initial connection attempt
-    let { page } = await connect({
-      headless: false,
-      fingerprint: true,
-      ignoreHTTPSErrors: true,
-      defaultViewport: null,
-      args: ['--no-sandbox'],
-    });
-
+    let { page } = await connectWithProxy();
     page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
 
@@ -252,48 +240,8 @@ const performLogin = async (email: string, password: string) => {
 
 const performReLogin = async (cookies: CookieParam[]) => {
   try {
-    const connectWithProxy = async () => {
-      const proxies = [
-        {
-          host: 'fast.froxy.com',
-          port: 10000,
-          username: 'xs0swnfhbn3lfbwmdt6ghxg',
-          password: 'RNW78Fm5',
-        },
-      ];
-
-      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
-
-      return await connect({
-        headless: false,
-        fingerprint: true,
-        proxy: {
-          host: randomProxy.host,
-          port: randomProxy.port,
-          username: randomProxy.username,
-          password: randomProxy.password,
-        },
-        ignoreHTTPSErrors: true,
-        defaultViewport: null,
-        args: ['--no-sandbox'],
-      });
-    };
-
     // Initial connection attempt
-    let { page } = await connect({
-      headless: false,
-      fingerprint: true,
-      proxy: {
-        host: 'fast.froxy.com',
-        port: 10000,
-        username: 'xs0swnfhbn3lfbwmdt6ghxg',
-        password: 'RNW78Fm5',
-      },
-      ignoreHTTPSErrors: true,
-      defaultViewport: null,
-      args: ['--no-sandbox'],
-    });
+    let { page } = await connectWithProxy();
 
     page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
@@ -338,48 +286,9 @@ const performReLogin = async (cookies: CookieParam[]) => {
 const bookAppointment = async (cookies, formData) => {
   try {
     // Function to connect with a random proxy
-    const connectWithProxy = async () => {
-      const proxies = [
-        {
-          host: 'fast.froxy.com',
-          port: 10000,
-          username: 'xs0swnfhbn3lfbwmdt6ghxg',
-          password: 'RNW78Fm5',
-        },
-      ];
-
-      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
-
-      return await connect({
-        headless: false,
-        fingerprint: true,
-        proxy: {
-          host: randomProxy.host,
-          port: randomProxy.port,
-          username: randomProxy.username,
-          password: randomProxy.password,
-        },
-        ignoreHTTPSErrors: true,
-        defaultViewport: null,
-        args: ['--no-sandbox'],
-      });
-    };
 
     // Initial connection attempt
-    let { page } = await connect({
-      headless: false,
-      fingerprint: true,
-      proxy: {
-        host: 'fast.froxy.com',
-        port: 10000,
-        username: 'xs0swnfhbn3lfbwmdt6ghxg',
-        password: 'RNW78Fm5',
-      },
-      ignoreHTTPSErrors: true,
-      defaultViewport: null,
-      args: ['--no-sandbox'],
-    });
+    let { page } = await connectWithProxy();
 
     page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
@@ -725,33 +634,6 @@ const bookAppointment = async (cookies, formData) => {
 const bookAppointment2 = async (cookies, formData) => {
   try {
     // Function to connect with a random proxy
-    const connectWithProxy = async () => {
-      const proxies = [
-        {
-          host: 'fast.froxy.com',
-          port: 10000,
-          username: 'xs0swnfhbn3lfbwmdt6ghxg',
-          password: 'RNW78Fm5',
-        },
-      ];
-
-      const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-      console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
-
-      return await connect({
-        headless: false,
-        fingerprint: true,
-        proxy: {
-          host: randomProxy.host,
-          port: randomProxy.port,
-          username: randomProxy.username,
-          password: randomProxy.password,
-        },
-        ignoreHTTPSErrors: true,
-        defaultViewport: null,
-        args: ['--no-sandbox'],
-      });
-    };
 
     // Initial connection attempt
     let { page } = await connect({
