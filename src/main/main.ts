@@ -81,9 +81,10 @@ const handleRateLimiting = async (page: any) => {
 
       await sleep(3000);
 
-      await page.goto('https://portal.ustraveldocs.com/applicanthome');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
-      await page.waitForNavigation({ waitUntil: 'load' });
+      await page.goto('https://portal.ustraveldocs.com/applicanthome', {
+        waitUntil: ['networkidle0', 'load'],
+      });
+      console.log('leaving this block');
     }
   }
   return page;
