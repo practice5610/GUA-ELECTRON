@@ -248,7 +248,18 @@ const performReLogin = async (cookies: CookieParam[]) => {
     // await page.waitForNavigation({ waitUntil: 'networkidle0' });
     // await page.waitForNavigation({ waitUntil: 'load' });
     page = await handleRateLimiting(page);
-
+    await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll('a'));
+      console.log('links2323', links);
+      const newUserLink = links.find(
+        (link) => link.textContent?.trim().includes('Continue'),
+      );
+      if (newUserLink) {
+        (newUserLink as HTMLElement).click();
+        return true;
+      }
+      return false;
+    });
     return true;
   } catch (error) {
     console.error('Error during login1212:', error);
