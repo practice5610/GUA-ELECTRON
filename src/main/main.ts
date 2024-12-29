@@ -206,7 +206,7 @@ const performLogin = async (email: string, password: string) => {
       password,
       { delay: 50 },
     );
-
+    console.log('using cred', email, password);
     const checkboxSelector =
       'input[name="loginPage:SiteTemplate:siteLogin:loginComponent:loginForm:j_id167"]';
     await page.waitForSelector(checkboxSelector, { visible: true });
@@ -237,48 +237,47 @@ const performLogin = async (email: string, password: string) => {
     return false;
   }
 };
+const handleRateLimiting = async (page: any) => {
+  console.log('startinggg');
+  const cfErrorDetails = await page.$('#cf-error-details');
+  if (cfErrorDetails) {
+    console.log('cfErrorDetails', cfErrorDetails);
+    const errorText = await page.evaluate(
+      (element: any) => element.innerText,
+      cfErrorDetails,
+    );
+    console.log('cfErrorDetails2323', errorText);
+    if (errorText.includes('Error 1015')) {
+      await page.close();
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else if (errorText.includes('Sorry, you have been blocked')) {
+      console.log('Block error detected.');
+      // Redirect the user to the specific page
+      await page.goto('https://portal.ustraveldocs.com');
+    }
+  }
+  return page;
+};
 
 const performReLogin = async (cookies: CookieParam[]) => {
   try {
-    // Initial connection attempt
     let { page } = await connectWithProxy();
-
     page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    // Check for rate-limiting error
-    const rateLimitError = await page.$('#cf-error-details');
-    if (rateLimitError) {
-      console.error('Rate limiting detected, retrying with a proxy...');
+    page = await handleRateLimiting(page);
 
-      // Close the current page to clean up resources
-      await page.close();
-
-      // Retry with a proxy
-      ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    } else {
-      console.log('No rate limiting detected, continuing with normal flow...');
-    }
-
-    // Now set cookies regardless of rate limiting detection
-    await sleep(3000);
     console.log('Setting cookies...');
-
-    // Spread the cookies array
     await page.setCookie(...cookies);
     await page.goto('https://portal.ustraveldocs.com/applicanthome');
-    await page.waitForNavigation({
-      waitUntil: 'networkidle0',
-    });
+    page = await handleRateLimiting(page);
 
-    console.log('Login process completed successfully.');
-    // await page.close();
-    return true; // Indicate success
+    return true;
   } catch (error) {
-    console.error('Error during login:', error);
+    console.error('Error during login1212:', error);
     return false; // Indicate failure
   }
 };
@@ -1008,9 +1007,8 @@ ipcMain.on('login-event', (event, data) => {
   performLogin(data.email, data.password);
 });
 ipcMain.on('login-user', async (event, data) => {
-  console.log('cehckdata', data);
   const cookies = await getUserCookiesByEmail(data.email);
-  console.log('cehckcookies', cookies);
+
   performReLogin(cookies);
 });
 ipcMain.on('book-appoint', async (event, data) => {
