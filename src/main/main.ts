@@ -34,6 +34,7 @@ const ensureCookiesDir = async () => {
     console.error('Error ensuring cookies directory:', error);
   }
 };
+
 const connectWithProxy = async () => {
   const proxies = Array.from({ length: 1000 }, (_, i) => ({
     host: 'fast.froxy.com',
@@ -45,7 +46,7 @@ const connectWithProxy = async () => {
   const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
   console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
 
-  return connect({
+  const { page } = await connect({
     headless: false,
     proxy: {
       host: randomProxy.host,
@@ -57,7 +58,34 @@ const connectWithProxy = async () => {
     defaultViewport: null,
     args: ['--no-sandbox'],
   });
+
+  page.setDefaultTimeout(120000);
+  return { page };
 };
+const handleRateLimiting = async (page: any) => {
+  console.log('startinggg');
+  const cfErrorDetails = await page.$('#cf-error-details');
+  if (cfErrorDetails) {
+    console.log('cfErrorDetails', cfErrorDetails);
+    const errorText = await page.evaluate(
+      (element: any) => element.innerText,
+      cfErrorDetails,
+    );
+    console.log('cfErrorDetails2323', errorText);
+    if (errorText.includes('Error 1015')) {
+      await page.close();
+      ({ page } = await connectWithProxy());
+      await page.goto('https://portal.ustraveldocs.com');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    } else if (errorText.includes('Sorry, you have been blocked')) {
+      console.log('Block error detected.');
+      // Redirect the user to the specific page
+      await page.goto('https://portal.ustraveldocs.com');
+    }
+  }
+  return page;
+};
+
 // Save cookies for a user
 const saveUserCookies = async (email: string, cookies: any[]) => {
   try {
@@ -159,54 +187,28 @@ const getUserCookiesByEmail = async (email: string) => {
 // };
 const performLogin = async (email: string, password: string) => {
   try {
-    // Initial connection attempt
     let { page } = await connectWithProxy();
-    page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
-
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
-
-    // Check for rate-limiting error
-    const rateLimitError = await page.$('#cf-error-details');
-    if (rateLimitError) {
-      console.error('Rate limiting detected, retrying with a proxy...');
-
-      // Close the current page to clean up resources
-      await page.close();
-
-      // Retry with a proxy
-      ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    } else {
-      console.log('No rate limiting detected, continuing with normal flow...');
-    }
-
-    await sleep(3000);
-    console.log('Page loaded...');
-
-    // Proceed with login process
+    await page.waitForNavigation({ waitUntil: 'load' });
+    console.log('site loaded completely');
+    await sleep(5000);
+    console.log('after delay');
+    page = await handleRateLimiting(page);
     await page.waitForSelector(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
       { timeout: 60000 },
     );
-
-    console.log('Username field is visible');
-
-    // Fill in the username
     await page.type(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
       email,
       { delay: 50 },
     );
-
-    // Fill in the password
     await page.type(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:password',
       password,
       { delay: 50 },
     );
-    console.log('using cred', email, password);
     const checkboxSelector =
       'input[name="loginPage:SiteTemplate:siteLogin:loginComponent:loginForm:j_id167"]';
     await page.waitForSelector(checkboxSelector, { visible: true });
@@ -216,55 +218,25 @@ const performLogin = async (email: string, password: string) => {
     await page.click(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:loginButton',
     );
-
-    // Wait for either navigation or an error message
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    await sleep(8000);
-
     const currentUrl = page.url();
     console.log(`URL: ${currentUrl}`);
     if (currentUrl === 'https://portal.ustraveldocs.com/applicanthome') {
-      console.log('User logged in successfully');
       const cookies = await page.cookies();
       await saveUserCookies(email, cookies);
       await page.close();
       return true;
-    } else {
-      return false;
     }
+    return false;
   } catch (error) {
     console.error('Error during login:', error);
     return false;
   }
 };
-const handleRateLimiting = async (page: any) => {
-  console.log('startinggg');
-  const cfErrorDetails = await page.$('#cf-error-details');
-  if (cfErrorDetails) {
-    console.log('cfErrorDetails', cfErrorDetails);
-    const errorText = await page.evaluate(
-      (element: any) => element.innerText,
-      cfErrorDetails,
-    );
-    console.log('cfErrorDetails2323', errorText);
-    if (errorText.includes('Error 1015')) {
-      await page.close();
-      ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    } else if (errorText.includes('Sorry, you have been blocked')) {
-      console.log('Block error detected.');
-      // Redirect the user to the specific page
-      await page.goto('https://portal.ustraveldocs.com');
-    }
-  }
-  return page;
-};
 
 const performReLogin = async (cookies: CookieParam[]) => {
   try {
     let { page } = await connectWithProxy();
-    page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
@@ -289,7 +261,6 @@ const bookAppointment = async (cookies, formData) => {
     // Initial connection attempt
     let { page } = await connectWithProxy();
 
-    page.setDefaultTimeout(120000);
     await page.goto('https://portal.ustraveldocs.com');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
