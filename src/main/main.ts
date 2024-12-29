@@ -63,10 +63,8 @@ const connectWithProxy = async () => {
   return { page };
 };
 const handleRateLimiting = async (page: any) => {
-  console.log('startinggg');
   const cfErrorDetails = await page.$('#cf-error-details');
   if (cfErrorDetails) {
-    console.log('cfErrorDetails', cfErrorDetails);
     const errorText = await page.evaluate(
       (element: any) => element.innerText,
       cfErrorDetails,
@@ -82,7 +80,7 @@ const handleRateLimiting = async (page: any) => {
       await page.goto('https://portal.ustraveldocs.com');
 
       await sleep(3000);
-      console.log('after delay>>>>>>>>>>>>>');
+
       await page.goto('https://portal.ustraveldocs.com/applicanthome');
       await page.waitForNavigation({ waitUntil: 'networkidle0' });
       await page.waitForNavigation({ waitUntil: 'load' });
