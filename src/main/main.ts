@@ -123,12 +123,10 @@ const saveUserCookies = async (email: string, cookies: any[]) => {
     const filteredCookies = cookies.filter(
       (cookie) => !excludedCookieNames.includes(cookie.name),
     );
-    console.log('Filtered Cookies:', filteredCookies);
-
     if (filteredCookies.length > 0) {
       // Write the new cookie file
       await fs.writeFile(filePath, JSON.stringify(filteredCookies, null, 2));
-      console.log(`Cookies saved for user: ${email}`);
+      console.log(`Cookies saved for user successfully`);
     } else {
       console.log('No cookies to save after filtering.');
     }
