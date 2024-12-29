@@ -18,6 +18,49 @@ body {
   font-family: sans-serif;
   overflow-y: hidden;
 }
+.modal .modal-dialog {
+  max-width: 600px;
+  margin: 1.75rem auto;
+}
+
+.modal .modal-content {
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.modal .modal-header {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.modal .modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.modal .modal-body {
+  padding-top: 0;
+}
+
+.modal .modal-footer {
+  border-top: none;
+  padding-top: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal .users-action-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal .users-action-btn:hover {
+  background-color: #0056b3;
+}
 
 .primary-btn {
   background-color: #83c601;
