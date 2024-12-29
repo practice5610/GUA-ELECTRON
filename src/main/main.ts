@@ -71,7 +71,6 @@ const handleRateLimiting = async (page: any) => {
       (element: any) => element.innerText,
       cfErrorDetails,
     );
-    console.log('cfErrorDetails2323', errorText);
     if (errorText.includes('Error 1015')) {
       await page.close();
       ({ page } = await connectWithProxy());
@@ -81,6 +80,12 @@ const handleRateLimiting = async (page: any) => {
       console.log('Block error detected.');
       // Redirect the user to the specific page
       await page.goto('https://portal.ustraveldocs.com');
+
+      await sleep(3000);
+      console.log('after delay>>>>>>>>>>>>>');
+      await page.goto('https://portal.ustraveldocs.com/applicanthome');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.waitForNavigation({ waitUntil: 'load' });
     }
   }
   return page;
@@ -237,12 +242,13 @@ const performReLogin = async (cookies: CookieParam[]) => {
     let { page } = await connectWithProxy();
     await page.goto('https://portal.ustraveldocs.com');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: 'load' });
 
     page = await handleRateLimiting(page);
-
-    console.log('Setting cookies...');
     await page.setCookie(...cookies);
-    await page.goto('https://portal.ustraveldocs.com/applicanthome');
+    await page.goto('https://portal.ustraveldocs.com/Applicanthome');
+    // await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    // await page.waitForNavigation({ waitUntil: 'load' });
     page = await handleRateLimiting(page);
 
     return true;
