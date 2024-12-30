@@ -42,10 +42,6 @@ const Users: React.FC = () => {
     };
 
     window.electron.ipcRenderer.on('users-data', handleGetUsers);
-
-    return () => {
-      window.electron.ipcRenderer.removeListener('users-data', handleGetUsers);
-    };
   }, []);
 
   const handleLogin = (email: string) => {

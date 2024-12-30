@@ -37,6 +37,10 @@ function FormE() {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
+      if (!formData.email || !formData.password) {
+        toast.error('Email and Password are required');
+        return;
+      }
       console.log('Form data to send:', formData);
       window.electron.ipcRenderer.sendMessage('login-event', formData);
     }
@@ -116,7 +120,7 @@ function FormE() {
             </Form.Label>
             <Form.Control
               required
-              type="password"
+              type="text"
               placeholder="Password"
               name="password"
               value={formData.password}
@@ -125,7 +129,7 @@ function FormE() {
             />
           </Form.Group>
         </Row>
-        <Row className=" flex-row mbc">
+        {/* <Row className=" flex-row mbc">
           <Form.Group
             as={Col}
             xs="12"
@@ -134,7 +138,7 @@ function FormE() {
             controlId="validationCustom03"
           >
             <Form.Label className="label" style={{ color: '#fff' }}>
-              Select User Type
+              Select User Type23
             </Form.Label>
             <Form.Select
               aria-label="Default select example"
@@ -197,10 +201,10 @@ function FormE() {
               <option value="Karachi">Karachi</option>
             </Form.Select>
           </Form.Group>
-        </Row>
+        </Row> */}
         <Row className="" style={{ textAlign: 'center' }}>
           <Button className="primary-btn" type="submit">
-            Submit form
+            Login User
           </Button>
         </Row>
       </Form>

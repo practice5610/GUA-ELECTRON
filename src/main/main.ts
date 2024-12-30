@@ -194,8 +194,6 @@ const performLogin = async (email: string, password: string) => {
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
     await page.waitForNavigation({ waitUntil: 'load' });
     console.log('site loaded completely');
-    await sleep(5000);
-    console.log('after delay');
     page = await handleRateLimiting(page);
     await page.waitForSelector(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
@@ -204,12 +202,12 @@ const performLogin = async (email: string, password: string) => {
     await page.type(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:username',
       email,
-      { delay: 50 },
+      { delay: 70 },
     );
     await page.type(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:password',
       password,
-      { delay: 50 },
+      { delay: 70 },
     );
     const checkboxSelector =
       'input[name="loginPage:SiteTemplate:siteLogin:loginComponent:loginForm:j_id167"]';
@@ -669,7 +667,7 @@ ipcMain.on('get-users', async (event) => {
 });
 
 ipcMain.on('login-event', (event, data) => {
-  // console.log('cehckdata', data);
+  console.log('cehckdata', data);
   performLogin(data.email, data.password);
 });
 ipcMain.on('login-user', async (event, data) => {
