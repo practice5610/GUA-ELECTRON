@@ -8,8 +8,8 @@ function Login() {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: 'usdoc@gmail.com',
-    password: 'usAppointment!',
+    email: '',
+    password: '',
   });
 
   const handleSubmit = (event) => {
@@ -27,7 +27,7 @@ function Login() {
     // Simulate login logic
     if (
       formData.email === 'usdoc@gmail.com' &&
-      formData.password === 'usAppointment!' &&
+      formData.password === 'usAppointment123!' &&
       new Date() < new Date('2025-01-01')
     ) {
       setIsLoading(false);
