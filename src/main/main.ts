@@ -1,5 +1,6 @@
 // import puppeteer from 'puppeteer-core';
 import { connect } from 'puppeteer-real-browser';
+import UserAgent from 'user-agents';
 
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
@@ -57,7 +58,10 @@ const connectWithProxy = async () => {
     turnstile: true,
     connectOption: { defaultViewport: null },
     disableXvfb: false,
+    args: ['--disable-infobars'],
   });
+  const userAgent = new UserAgent({ deviceCategory: 'desktop' });
+  await page.setUserAgent(userAgent.toString());
 
   page.setDefaultTimeout(120000);
   return { page };

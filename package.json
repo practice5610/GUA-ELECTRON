@@ -106,7 +106,8 @@
     "react-bootstrap": "^2.10.6",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",
-    "react-toastify": "^10.0.6"
+    "react-toastify": "^10.0.6",
+    "user-agents": "^1.1.405"
   },
   "devDependencies": {
     "@electron/notarize": "^2.1.0",
