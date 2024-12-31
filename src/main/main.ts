@@ -9,8 +9,10 @@ import path from 'path';
 import fs from 'fs/promises';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { CookieParam } from 'puppeteer-core';
-
+const site =
+  'https://portal.ustraveldocs.com/?country=Pakistan&language=English';
+  const site2 =
+  'https://portal.ustraveldocs.com/applicanthome';
 const COOKIES_DIR = './cookies';
 class AppUpdater {
   constructor() {
@@ -76,16 +78,19 @@ const handleRateLimiting = async (page: any) => {
     if (errorText.includes('Error 1015')) {
       await page.close();
       ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.goto(site, {
+        waitUntil: ['networkidle0', 'load'],
+      });
     } else if (errorText.includes('Sorry, you have been blocked')) {
       console.log('Block error detected.');
       // Redirect the user to the specific page
-      await page.goto('https://portal.ustraveldocs.com');
+      await page.goto(site, {
+        waitUntil: ['networkidle0', 'load'],
+      });
 
       await sleep(3000);
 
-      await page.goto('https://portal.ustraveldocs.com/applicanthome', {
+      await page.goto(site2, {
         waitUntil: ['networkidle0', 'load'],
       });
       console.log('leaving this block');
@@ -175,28 +180,13 @@ const getUserCookiesByEmail = async (email: string) => {
     return null;
   }
 };
-// const openGoogleInChrome = async (url: string) => {
-//   try {
-//     const browser = await puppeteer.launch({
-//       headless: false, // Set to false to see the Chrome window
-//       executablePath:
-//         'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Adjust the path as needed
-//       args: ['--no-sandbox', '--disable-setuid-sandbox'], // Necessary for some environments
-//     });
-
-//     const page = await browser.newPage();
-//     await page.goto(url, { waitUntil: 'domcontentloaded' });
-//     console.log(`Opened ${url} in a separate Chrome window.`);
-//   } catch (error) {
-//     console.error('Failed to open the URL in Chrome:', error);
-//   }
-// };
 const performLogin = async (email: string, password: string) => {
   try {
     let { page } = await connectWithProxy();
-    await page.goto('https://portal.ustraveldocs.com');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    await page.waitForNavigation({ waitUntil: 'load' });
+    await page.goto(site, {
+      waitUntil: ['networkidle0', 'load'],
+    });
+
     console.log('site loaded completely');
     page = await handleRateLimiting(page);
     await page.waitForSelector(
@@ -222,10 +212,10 @@ const performLogin = async (email: string, password: string) => {
     await page.click(
       '#loginPage\\:SiteTemplate\\:siteLogin\\:loginComponent\\:loginForm\\:loginButton',
     );
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], });
     const currentUrl = page.url();
     console.log(`URL: ${currentUrl}`);
-    if (currentUrl === 'https://portal.ustraveldocs.com/applicanthome') {
+    if (currentUrl === site2) {
       const cookies = await page.cookies();
       await saveUserCookies(email, cookies);
       await page.close();
@@ -238,18 +228,20 @@ const performLogin = async (email: string, password: string) => {
   }
 };
 
-const performReLogin = async (cookies: CookieParam[]) => {
+const performReLogin = async (cookies) => {
   try {
     let { page } = await connectWithProxy();
-    await page.goto('https://portal.ustraveldocs.com');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    await page.waitForNavigation({ waitUntil: 'load' });
+    await page.goto(site, {
+      waitUntil: ['networkidle0', 'load'],
+    });
+
 
     page = await handleRateLimiting(page);
     await page.setCookie(...cookies);
-    await page.goto('https://portal.ustraveldocs.com/Applicanthome');
-    // await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    // await page.waitForNavigation({ waitUntil: 'load' });
+    await page.goto(site2, {
+      waitUntil: ['networkidle0', 'load'],
+    });
+
     page = await handleRateLimiting(page);
     await page.evaluate(() => {
       const links = Array.from(document.querySelectorAll('a'));
@@ -277,8 +269,10 @@ const bookAppointment = async (cookies, formData) => {
     // Initial connection attempt
     let { page } = await connectWithProxy();
 
-    await page.goto('https://portal.ustraveldocs.com');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.goto(site, {
+      waitUntil: ['networkidle0', 'load'],
+    });
+
 
     const blocked = await page
       .waitForSelector('#cf-error-details', { timeout: 5000 })
@@ -290,8 +284,10 @@ const bookAppointment = async (cookies, formData) => {
       );
       await page.close();
       ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.goto(site, {
+        waitUntil: ['networkidle0', 'load'],
+      });
+
     }
 
     // Check for rate-limiting error
@@ -307,8 +303,10 @@ const bookAppointment = async (cookies, formData) => {
 
       // Retry with a proxy
       ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.goto(site, {
+        waitUntil: ['networkidle0', 'load'],
+      });
+
     } else {
       console.log('No rate limiting detected, continuing with normal flow...');
     }
@@ -316,8 +314,8 @@ const bookAppointment = async (cookies, formData) => {
     // Set cookies and navigate to user home
     console.log('Setting cookies...');
     await page.setCookie(...cookies);
-    await page.goto('https://portal.ustraveldocs.com/applicanthome', {
-      waitUntil: 'networkidle2',
+    await page.goto(site2, {
+      waitUntil: ['networkidle0', 'load'],
     });
     console.log('network kindle finished');
 
@@ -329,8 +327,10 @@ const bookAppointment = async (cookies, formData) => {
 
       // Retry with a proxy
       ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com/applicanthome');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.goto(site2, {
+        waitUntil: ['networkidle0', 'load'],
+      });
+
     } else {
       console.log('No rate limiting detected, continuing with normal flow...');
     }
@@ -346,7 +346,7 @@ const bookAppointment = async (cookies, formData) => {
       await page.click(
         'a[onclick*="j_id0:SiteTemplate:j_id52:j_id53:j_id54:j_id61"]',
       );
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], });
 
       console.log('Navigating to the Visa Type page...');
     } else {
@@ -391,7 +391,7 @@ const bookAppointment = async (cookies, formData) => {
           await page.click('input[name="j_id0:SiteTemplate:theForm:j_id176"]');
 
           // Wait for navigation to complete
-          await page.waitForNavigation({ waitUntil: 'networkidle0' });
+          await page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], });
           console.log('Form submission successful.');
         } catch (error) {
           console.error(`Error during form handling: ${error.message}`);
@@ -424,7 +424,7 @@ const bookAppointment = async (cookies, formData) => {
       console.log('Clicked "Continue" button.');
 
       // Wait for the next page to load (if applicable)
-      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      await page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], });
       console.log('Form submitted and navigated to the next page.');
     } else {
       console.error('Failed to navigate to the select post page.');
@@ -565,7 +565,7 @@ const bookAppointment = async (cookies, formData) => {
       console.log('Clicked "Continue" button.');
 
       // Wait for the next page to load (if applicable)
-      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      await page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], });
       console.log('Navigated to the next page after selecting the category.');
     } else {
       console.error('Failed to navigate to the Visa category page.');
@@ -596,8 +596,10 @@ const bookAppointment = async (cookies, formData) => {
 
       // Retry with a proxy
       ({ page } = await connectWithProxy());
-      await page.goto('https://portal.ustraveldocs.com/updatedata');
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      await page.goto('https://portal.ustraveldocs.com/updatedata', {
+        waitUntil: ['networkidle0', 'load'],
+      });
+
     } else {
       console.log('No rate limiting detected, continuing with normal flow...');
     }
@@ -652,7 +654,7 @@ const bookAppointment2 = async (cookies, formData) => {
     await page.click(continueButtonSelector);
 
     // Wait for navigation after clicking continue
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], });
   } catch (error) {
     console.error('Error during booking:', error);
     return false;
