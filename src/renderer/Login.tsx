@@ -8,8 +8,8 @@ function Login() {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'usdoc@gmail.com',
+    password: 'usAppointment123!',
   });
 
   const handleSubmit = (event) => {

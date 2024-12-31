@@ -54,9 +54,9 @@ const connectWithProxy = async () => {
       username: randomProxy.username,
       password: randomProxy.password,
     },
-    ignoreHTTPSErrors: true,
-    defaultViewport: null,
-    args: ['--no-sandbox'],
+    turnstile: true,
+    connectOption: { defaultViewport: null },
+    disableXvfb: false,
   });
 
   page.setDefaultTimeout(120000);
