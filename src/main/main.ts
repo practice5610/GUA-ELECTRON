@@ -1,14 +1,15 @@
 // import puppeteer from 'puppeteer-core';
 import { connect } from 'puppeteer-real-browser';
 import UserAgent from 'user-agents';
-
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import path from 'path';
 import fs from 'fs/promises';
 import MenuBuilder from './menu';
+import useProxy from 'puppeteer-page-proxy';
 import { resolveHtmlPath } from './util';
+
 const site =
   'https://portal.ustraveldocs.com/?country=Pakistan&language=English';
 const site2 = 'https://portal.ustraveldocs.com/applicanthome';
@@ -36,8 +37,7 @@ const ensureCookiesDir = async () => {
     console.error('Error ensuring cookies directory:', error);
   }
 };
-
-const connectWithProxy = async () => {
+const getRandomProxy = () => {
   const proxies = Array.from({ length: 1000 }, (_, i) => ({
     host: 'fast.froxy.com',
     port: 10000 + i,
@@ -46,7 +46,11 @@ const connectWithProxy = async () => {
   }));
 
   const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-  console.log(`Using proxy: ${randomProxy.host}:${randomProxy.port}`);
+  console.log(`Using proxy: `, randomProxy);
+  return randomProxy;
+};
+const connectWithProxy = async () => {
+  const randomProxy = getRandomProxy();
 
   const { page } = await connect({
     headless: false,
@@ -59,7 +63,7 @@ const connectWithProxy = async () => {
     turnstile: true,
     connectOption: { defaultViewport: null },
     disableXvfb: false,
-    args: ['--disable-infobars'],
+    args: ['--disable-web-security'],
   });
   const userAgent = new UserAgent({ deviceCategory: 'desktop' });
   await page.setUserAgent(userAgent.toString());
@@ -716,6 +720,7 @@ if (isDebug) {
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
+  const puppeteerPageProxy = require('puppeteer-page-proxy');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
   const extensions = ['REACT_DEVELOPER_TOOLS'];
 
