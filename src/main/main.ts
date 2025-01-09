@@ -10,8 +10,7 @@ import MenuBuilder from './menu';
 import useProxy from '@lem0-packages/puppeteer-page-proxy';
 import { resolveHtmlPath } from './util';
 
-const site =
-  'https://portal.ustraveldocs.com/?country=Pakistan&language=English';
+const site = 'https://portal.ustraveldocs.com';
 const site2 = 'https://portal.ustraveldocs.com/applicanthome';
 const COOKIES_DIR = './cookies';
 class AppUpdater {
@@ -248,29 +247,14 @@ const performLogin = async (email: string, password: string) => {
 const performReLogin = async (cookies) => {
   try {
     let { page } = await connectWithProxy();
-    await page.goto(site, {
-      waitUntil: ['networkidle0', 'load'],
-    });
-
-    page = await handleRateLimiting(page);
+    await page.goto(site);
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: 'load' });
     await page.setCookie(...cookies);
-    await page.goto(site2, {
-      waitUntil: ['networkidle0', 'load'],
-    });
-
+    await page.goto(site);
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: 'load' });
     page = await handleRateLimiting(page);
-    await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll('a'));
-      console.log('links2323', links);
-      const newUserLink = links.find((link) =>
-        link.textContent?.trim().includes('Continue'),
-      );
-      if (newUserLink) {
-        (newUserLink as HTMLElement).click();
-        return true;
-      }
-      return false;
-    });
     return page;
   } catch (error) {
     console.error('Error during login1212:', error);
