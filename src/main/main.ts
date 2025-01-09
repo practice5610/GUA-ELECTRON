@@ -7,7 +7,7 @@ import log from 'electron-log';
 import path from 'path';
 import fs from 'fs/promises';
 import MenuBuilder from './menu';
-import useProxy from 'puppeteer-page-proxy';
+import useProxy from '@lem0-packages/puppeteer-page-proxy';
 import { resolveHtmlPath } from './util';
 
 const site =
@@ -63,7 +63,21 @@ const connectWithProxy = async () => {
     turnstile: true,
     connectOption: { defaultViewport: null },
     disableXvfb: false,
-    args: ['--disable-web-security'],
+    args: ['--disable-infobars'],
+  });
+  const userAgent = new UserAgent({ deviceCategory: 'desktop' });
+  await page.setUserAgent(userAgent.toString());
+
+  page.setDefaultTimeout(120000);
+  return { page };
+};
+const connectWithoutProxy = async () => {
+  const { page } = await connect({
+    headless: false,
+    turnstile: true,
+    connectOption: { defaultViewport: null },
+    disableXvfb: false,
+    args: ['--disable-infobars'],
   });
   const userAgent = new UserAgent({ deviceCategory: 'desktop' });
   await page.setUserAgent(userAgent.toString());
@@ -720,7 +734,7 @@ if (isDebug) {
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
-  const puppeteerPageProxy = require('puppeteer-page-proxy');
+
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
   const extensions = ['REACT_DEVELOPER_TOOLS'];
 
