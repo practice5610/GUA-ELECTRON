@@ -40,7 +40,7 @@ const getRandomProxy = () => {
   const proxies = Array.from({ length: 1000 }, (_, i) => ({
     host: 'fast.froxy.com',
     port: 10000 + i,
-    username: 'xs0swnfhbn3lfbwmdt6ghxg',
+    username: 'uizypysoqyh6cm7m2ymomfb',
     password: 'RNW78Fm5',
   }));
 
